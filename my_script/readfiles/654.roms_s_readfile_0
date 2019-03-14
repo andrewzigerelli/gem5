@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/654.roms_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/sroms_base.myconf-m64 < ocean_benchmark3.in > ocean_benchmark3.log 2>> ocean_benchmark3.err;m5 exit;

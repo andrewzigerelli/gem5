@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/557.xz_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/xz_r_base.myconf-m64 input.combined.xz 250 a841f68f38572a49d86226b7ff5baeb31bd19dc637a922a972b2e6d1257a890f6a544ecab967c313e370478c74f760eb229d4eef8a8d2836d233d3e9dd1430bf 40401484 41217675 7 > input.combined-250-7.out 2>> input.combined-250-7.err;m5 exit;

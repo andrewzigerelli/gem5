@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/500.perlbench_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/perlbench_r_base.myconf-m64 -I./lib splitmail.pl 6400 12 26 16 100 0 > splitmail.6400.12.26.16.100.0.out 2>> splitmail.6400.12.26.16.100.0.err;m5 exit;
