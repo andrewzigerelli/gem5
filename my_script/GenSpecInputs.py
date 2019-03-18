@@ -85,7 +85,7 @@ def main():
         parseCmd(substring, readfileDir, bench)
         specFile.write(substring+"\n")
 
-        # write to
+    # write to
     specFile.close()
 
 def parseCmd(cmd, readfileDir, bench):

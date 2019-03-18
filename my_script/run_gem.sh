@@ -7,7 +7,9 @@
 ###################################################
 
 
-GEM_CMD=$GEM5_PATH/build/X86_MESI_Two_Level/gem5.opt
+BUILD=X86_MESI_Two_Level
+GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
+GDB_GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.debug
 ######## IF YOU CHANGE THIS, MAKE SURE TO RECHECKPOINT!!!
 #BENCH_GEM_CMD=$GEM5_PATH/build/X86_MOESI_AMD_Base/gem5.opt
 #GEM_MOESI_HAMMER=$GEM5_PATH/build/X86_MOESI_hammer/gem5.opt
@@ -41,7 +43,7 @@ L2_ASSOC="16"
 L3_SIZE="2MB"
 L3_ASSOC="8"
 
-USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
+USE_RUBY="FALSE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
 MAXINSTS=1000000000
@@ -68,7 +70,10 @@ CMD_LINE='earlyprintk=ttyS0 console=ttyS0 console_msg_format=syslog lpj=7999923 
 
 
 #### SET UP GEM5 OPTIONS FOR FS.PY
-CKPT_DIR=./checkpoints
+# we don't distinguish between ruby and non ruby checkpoints
+# we save checkpoints in own paths for convenience
+CKPT_DIR=$GEM5_PATH"/"my_script"/"checkpoints"/"$BUILD
+
 
 ### readfile for gem5
 CKPT_READFILE="$(pwd)/../configs/boot/hack_back_ckpt.rcS" #set for ckpt for now
@@ -108,7 +113,7 @@ if [ "$1" = "--fs-options" ]; then
 fi
 
 #OUT_DIR="./"output"/"$DISK_IMAGE"/"$KERNEL"/L2_size_"$L2_SIZE
-OUT_DIR=$GEM5_PATH"/"my_script/"/"output"/"$DISK_IMAGE"/"$KERNEL
+OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$DISK_IMAGE"/"$KERNEL
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
@@ -164,12 +169,13 @@ BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flag=$BENCH_DEBUG_FLAG" "--debug-file=$BENCH_DEBUG_FILE" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+DEBUG_CMD=$GDB_GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 if [ "$1" = "--dry-run" ]; then
     echo $FULL_CMD
     exit
 fi
 if [ "$1" = "--gdb" ]; then
-    GDB_CMD="gdb --args "$FULL_CMD
+    GDB_CMD="gdb --args "$DEBUG_CMD
     eval $GDB_CMD
     exit
 fi
