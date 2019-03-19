@@ -46,7 +46,7 @@ L3_ASSOC="8"
 USE_RUBY="FALSE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=100000000
+MAXINSTS=10000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -168,7 +168,6 @@ BENCH_DEBUG_FLAG=RCTStats
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flag=$BENCH_DEBUG_FLAG" "--debug-file=$BENCH_DEBUG_FILE" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 DEBUG_CMD=$GDB_GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 if [ "$1" = "--dry-run" ]; then
     echo $FULL_CMD
