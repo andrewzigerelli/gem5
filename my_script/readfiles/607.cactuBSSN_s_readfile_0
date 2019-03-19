@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/607.cactuBSSN_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/cactuBSSN_s_base.myconf-m64 spec_ref.par   > spec_ref.out 2>> spec_ref.err;m5 exit;

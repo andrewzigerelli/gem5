@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/649.fotonik3d_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/fotonik3d_s_base.myconf-m64 > fotonik3d_s.log 2>> fotonik3d_s.err;m5 exit;
