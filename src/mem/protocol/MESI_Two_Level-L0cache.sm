@@ -1,0 +1,141 @@
+/*
+ * Copyright (c) 1999-2013 Mark D. Hill and David A. Wood
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met: redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer;
+ * redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution;
+ * neither the name of the copyright holders nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+machine(MachineType:L0Cache, "MESI Directory Buffer CMP")
+ : CacheMemory * L0cache;
+   Cycles buffer_latency := 2;
+
+   // Message Queues
+
+   // From this buffer tO the local L1
+  // MessageBuffer * responseFromBuff, network="To", virtual_network="0",
+  //      vnet_type="response";
+
+
+
+
+   // To this buffer request FROM L1 cache
+   MessageBuffer * buffrequest, network="From", virtual_network="3",
+        vnet_type="Buffrequest";
+
+{
+  // STATES
+  state_declaration(State, desc="Cache states", default="L0Cache_State_NP") {
+    // Base states
+    SS, AccessPermission:Read_Write, desc="the only state in this controller";
+    NP, AccessPermission:Invalid, desc="Not present";
+  }
+
+  //EVENTs
+  enumeration(Event, desc=" RCT Buffer Events"){
+    randomtiming;
+}
+    // RCT Events
+  
+
+
+
+//Entry Structure
+  structure(Entry, desc="...", interface="AbstractCacheEntry") {
+    State CacheState,   desc="  ";
+    DataBlock DataBlk, desc="...";
+  }
+
+//TBE fields
+//  structure(TBE)
+  // counter fields
+  //structure (CBE, desc="andrew is best"){
+  //  Addr addr,    desc="andrew is great";
+  //  DataBlock DataBlk, desc="andrew is stupid";
+  //  //can we add define in state machine file to leave an interface for
+  //  //configuring counter numbers
+  //  int counter[10], desc="have nothing else to say";
+  //  bool valid, desc="balabala";
+  //}
+  //structure(CBETable, external="yes") {
+  //  CBE lookup(Addr);
+  //  void allocate(Addr);
+  //  void deallocate(Addr);
+  //  bool isPresent(Addr);
+  //}
+  
+ // CBETable CBEs, template="<L0Cache_CBE>", m_
+  
+  Tick clockEdge();
+  Cycles ticksToCycles(Tick t);
+  void set_cache_entry(AbstractCacheEntry a);
+  void unset_Cache_entry();
+  void set_tbe();
+  void wakeUpBuffers(Addr a);
+  void profileMsgDelay(int virtualNetworkType, Cycles c);
+
+  in_port(BuffRequest, RequestMsg, buffrequest, desc="...") {
+    peek(BuffRequest, RequestMsg) { 
+    DPRINTF(bufferflag, "andrew is soooooooooooo annoying");
+    }
+      }
+
+  State getState(Entry cache_entry, Addr addr){
+    if(is_valid(cache_entry)) {
+       return cache_entry.CacheState;
+       }
+    else {
+       return State:NP;
+       }
+  }
+  
+  void setState(Entry cache_entry, Addr addr, State state){
+    if(is_valid(cache_entry)) {
+      cache_entry.CacheState := state;
+    }
+  }
+
+
+  void setAccessPermission(Entry cache_entry, Addr addr, State state){
+    }
+    
+  AccessPermission getAccessPermission(Addr addr) {
+    return L0Cache_State_to_permission(State:NP);
+  }
+
+  void functionalRead(Addr addr, Packet *pkt){
+   
+  }
+
+  int functionalWrite(Addr addr, Packet *pkt) {
+    return 1;
+  }
+
+
+
+
+}
+
+
+
+   
