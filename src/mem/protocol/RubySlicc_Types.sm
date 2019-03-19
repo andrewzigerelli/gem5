@@ -102,10 +102,14 @@ structure (NetDest, external = "yes", non_obj="yes") {
 structure (Sequencer, external = "yes") {
   void readCallback(Addr, DataBlock);
   void readCallback(Addr, DataBlock, bool);
+  //yanan
+  void readCallback(Addr, DataBlock, bool, bool);
   void readCallback(Addr, DataBlock, bool, MachineType);
   void readCallback(Addr, DataBlock, bool, MachineType,
                     Cycles, Cycles, Cycles);
-
+  //yanan
+  int testfunction(int);
+  
   void writeCallback(Addr, DataBlock);
   void writeCallback(Addr, DataBlock, bool);
   void writeCallback(Addr, DataBlock, bool, MachineType);
@@ -210,6 +214,13 @@ structure (CacheMemory, external = "yes") {
   int getCacheSize();
   int getNumBlocks();
   Addr getAddressAtIdx(int);
+
+  //andrew
+  void insertRCTEntry(Addr, Cycles);
+  bool isRCTFull(Addr);
+  void cleanRCTBuffer(Cycles);
+
+
 
   Scalar demand_misses;
   Scalar demand_hits;

@@ -29,9 +29,9 @@
 machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
  : CacheMemory * L2cache;
    Cycles l2_request_latency := 2;
-   Cycles l2_response_latency := 2;
+   Cycles l2_response_latency := 1;
    Cycles to_l1_latency := 1;
-
+   //Sequencer * sequencer;
   // Message Queues
   // From local bank of L2 cache TO the network
   MessageBuffer * DirRequestFromL2Cache, network="To", virtual_network="0",
@@ -125,6 +125,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     MachineID Exclusive,          desc="Exclusive holder of block";
     DataBlock DataBlk,       desc="data for the block";
     bool Dirty, default="false", desc="data is dirty";
+    //yanan
   }
 
   // TBE fields
@@ -147,6 +148,9 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   }
 
   TBETable TBEs, template="<L2Cache_TBE>", constructor="m_number_of_TBEs";
+
+//yanan
+  bool a := false;
 
   Tick clockEdge();
   Tick cyclesToTicks(Cycles c);
@@ -520,7 +524,12 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       out_msg.Destination := tbe.L1_GetS_IDs;  // internal nodes
       out_msg.DataBlk := cache_entry.DataBlk;
       out_msg.MessageSize := MessageSizeType:Response_Data;
+
+      //yanan cache miss tag
+      out_msg.CacheMiss := true;
+      //DPRINTF(myflag2, "cache miss %d\n", out_msg.CacheMiss);
     }
+    //sequencer.readCallback(address, cache_entry.DataBlk, a);
   }
 
   action(ex_sendExclusiveDataToGetSRequestors, "ex", desc="Send data from cache to all GetS IDs") {
@@ -534,6 +543,10 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       out_msg.Destination := tbe.L1_GetS_IDs;  // internal nodes
       out_msg.DataBlk := cache_entry.DataBlk;
       out_msg.MessageSize := MessageSizeType:Response_Data;
+      
+      //yanan cache miss tag
+      out_msg.CacheMiss := true;
+      //DPRINTF(myflag2, "cache miss %d\n", out_msg.CacheMiss);
     }
   }
 
@@ -550,6 +563,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       DPRINTF(RubySlicc, "Address: %#x, Destination: %s, DataBlock: %s\n",
               out_msg.addr, out_msg.Destination, out_msg.DataBlk);
       out_msg.MessageSize := MessageSizeType:Response_Data;
+
     }
   }
 
@@ -629,6 +643,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       cache_entry.DataBlk := in_msg.DataBlk;
       if (in_msg.Dirty) {
         cache_entry.Dirty := in_msg.Dirty;
+        //yanan
+        //cache_entry.CacheMiss := true;
       }
     }
   }

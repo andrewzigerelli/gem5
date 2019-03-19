@@ -41,6 +41,7 @@ enumeration(CoherenceRequestType, desc="...") {
 
   DMA_READ, desc="DMA Read";
   DMA_WRITE, desc="DMA Write";
+  BUFFREQ, desc="buffer request";
 }
 
 // CoherenceResponseType
@@ -95,7 +96,9 @@ structure(ResponseMsg, desc="...", interface="Message") {
   bool Dirty, default="false",  desc="Dirty bit";
   int AckCount, default="0",  desc="number of acks in this message";
   MessageSizeType MessageSize,  desc="size category of the message";
-
+  
+  //yanan
+  bool CacheMiss, default="false", desc="tell L1 whether it's a L2 hit or misss";
   bool functionalRead(Packet *pkt) {
     // Valid data block is only present in message with following types
     if (Type == CoherenceResponseType:DATA ||

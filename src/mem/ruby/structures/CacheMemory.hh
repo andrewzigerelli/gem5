@@ -43,6 +43,7 @@
 #include "mem/ruby/slicc_interface/RubySlicc_ComponentMapping.hh"
 #include "mem/ruby/structures/AbstractReplacementPolicy.hh"
 #include "mem/ruby/structures/BankedArray.hh"
+#include "mem/ruby/structures/RCTBuffer.hh" //andrew
 #include "mem/ruby/system/CacheRecorder.hh"
 #include "params/RubyCache.hh"
 #include "sim/sim_object.hh"
@@ -151,6 +152,13 @@ class CacheMemory : public SimObject
     int getNumBlocks() const { return m_cache_num_sets * m_cache_assoc; }
     Addr getAddressAtIdx(int idx) const;
 
+    //andrew
+    void insertRCTEntry(Addr address, Cycles ret_cycle); //rct
+    bool isRCTFull(Addr address);
+    void cleanRCTBuffer(Cycles cur_cycle);
+
+
+
   private:
     // convert a Address to its location in the cache
     int64_t addressToCacheSet(Addr address) const;
@@ -185,6 +193,11 @@ class CacheMemory : public SimObject
     int m_start_index_bit;
     bool m_resource_stalls;
     int m_block_size;
+
+    //andrew
+    //rct structure
+    RCTBuffer rct_buffer;
+    //std::map<Addr, Cycles> rct_buffer;
 };
 
 std::ostream& operator<<(std::ostream& out, const CacheMemory& obj);
