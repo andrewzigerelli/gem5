@@ -25,7 +25,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "mem/ruby/system/Sequencer.hh"
 
 #include "arch/x86/ldstflags.hh"
@@ -33,9 +32,16 @@
 #include "base/str.hh"
 #include "cpu/testers/rubytest/RubyTester.hh"
 #include "debug/MemoryAccess.hh"
+#include "debug/My_Flag.hh"
 #include "debug/ProtocolTrace.hh"
 #include "debug/RubySequencer.hh"
 #include "debug/RubyStats.hh"
+#include "debug/bufferflag.hh"
+#include "debug/missflag.hh"
+#include "debug/myflag.hh"
+#include "debug/myflag1.hh"
+#include "debug/myflag2.hh"
+#include "debug/myflag3.hh"
 #include "mem/packet.hh"
 #include "mem/protocol/PrefetchBit.hh"
 #include "mem/protocol/RubyAccessMode.hh"
@@ -313,18 +319,27 @@ Sequencer::handleLlsc(Addr address, SequencerRequest* request)
 void
 Sequencer::recordMissLatency(const Cycles cycles, const RubyRequestType type,
                              const MachineType respondingMach,
-                             bool isExternalHit, Cycles issuedTime,
+                             bool isExternalHit,
+                             bool CacheMiss,
+                             bool read,
+                             Cycles issuedTime,
                              Cycles initialRequestTime,
                              Cycles forwardRequestTime,
                              Cycles firstResponseTime, Cycles completionTime)
 {
+
     m_latencyHist.sample(cycles);
     m_typeLatencyHist[type]->sample(cycles);
+    //yanan
+    //add the function of distinguishing l1 hit, l2 hit, and cache miss
+    //use missflag for DPRINTF
+    DPRINTFR(My_Flag, "%d\n", cycles);
 
     if (isExternalHit) {
         m_missLatencyHist.sample(cycles);
         m_missTypeLatencyHist[type]->sample(cycles);
-
+        if (CacheMiss && read) DPRINTF(missflag, "off chip %d\n", cycles);
+        else if (read) DPRINTF(missflag, "l2 hit %d\n", cycles);
         if (respondingMach != MachineType_NUM) {
             m_missMachLatencyHist[respondingMach]->sample(cycles);
             m_missTypeMachLatencyHist[type][respondingMach]->sample(cycles);
@@ -347,6 +362,7 @@ Sequencer::recordMissLatency(const Cycles cycles, const RubyRequestType type,
             }
         }
     } else {
+        if (read)DPRINTF(missflag, "l1 hit %d\n", cycles);
         m_hitLatencyHist.sample(cycles);
         m_hitTypeLatencyHist[type]->sample(cycles);
 
@@ -407,14 +423,18 @@ Sequencer::writeCallback(Addr address, DataBlock& data,
     } else if (request->m_type == RubyRequestType_Locked_RMW_Write) {
         m_controller->unblock(address);
     }
-
-    hitCallback(request, data, success, mach, externalHit,
+//yanan
+    hitCallback(request, data, success, mach, externalHit, false, false,
                 initialRequestTime, forwardRequestTime, firstResponseTime);
 }
 
+
+//yanan
+void testfunction(int input){ }
 void
 Sequencer::readCallback(Addr address, DataBlock& data,
-                        bool externalHit, const MachineType mach,
+                        bool externalHit, bool CacheMiss,
+                        const MachineType mach,
                         Cycles initialRequestTime,
                         Cycles forwardRequestTime,
                         Cycles firstResponseTime)
@@ -431,15 +451,21 @@ Sequencer::readCallback(Addr address, DataBlock& data,
 
     assert((request->m_type == RubyRequestType_LD) ||
            (request->m_type == RubyRequestType_IFETCH));
-
-    hitCallback(request, data, true, mach, externalHit,
+//yanan
+    //DPRINTF(bufferflag, "sequencer\n");
+    DPRINTF(myflag1, "external flag %d\n", externalHit);
+    hitCallback(request, data, true, mach, externalHit, CacheMiss, true,
                 initialRequestTime, forwardRequestTime, firstResponseTime);
 }
 
+//yanan
+//add new arguement bool CacheMiss
 void
 Sequencer::hitCallback(SequencerRequest* srequest, DataBlock& data,
                        bool llscSuccess,
                        const MachineType mach, const bool externalHit,
+                       const bool CacheMiss,
+                       const bool read,
                        const Cycles initialRequestTime,
                        const Cycles forwardRequestTime,
                        const Cycles firstResponseTime)
@@ -456,8 +482,11 @@ Sequencer::hitCallback(SequencerRequest* srequest, DataBlock& data,
     assert(curCycle() >= issued_time);
     Cycles total_latency = curCycle() - issued_time;
 
+    //yanan
+    //add new arguement bool CacheMiss
     // Profile the latency for all demand accesses.
-    recordMissLatency(total_latency, type, mach, externalHit, issued_time,
+    recordMissLatency(total_latency, type, mach, externalHit, CacheMiss,
+                      read, issued_time,
                       initialRequestTime, forwardRequestTime,
                       firstResponseTime, curCycle());
 

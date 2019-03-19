@@ -78,10 +78,15 @@ class Sequencer : public RubyPort
     void readCallback(Addr address,
                       DataBlock& data,
                       const bool externalHit = false,
+                      //yanan
+                      const bool CacheMiss = false,
                       const MachineType mach = MachineType_NUM,
                       const Cycles initialRequestTime = Cycles(0),
                       const Cycles forwardRequestTime = Cycles(0),
                       const Cycles firstResponseTime = Cycles(0));
+
+    //yanan
+    void testfunction( int input);
 
     RequestStatus makeRequest(PacketPtr pkt);
     bool empty() const;
@@ -154,13 +159,16 @@ class Sequencer : public RubyPort
     void hitCallback(SequencerRequest* request, DataBlock& data,
                      bool llscSuccess,
                      const MachineType mach, const bool externalHit,
+                     const bool CacheMiss, const bool read,
                      const Cycles initialRequestTime,
                      const Cycles forwardRequestTime,
                      const Cycles firstResponseTime);
 
     void recordMissLatency(const Cycles t, const RubyRequestType type,
                            const MachineType respondingMach,
-                           bool isExternalHit, Cycles issuedTime,
+                           bool isExternalHit,
+                           bool CacheMiss, bool read,
+                           Cycles issuedTime,
                            Cycles initialRequestTime,
                            Cycles forwardRequestTime, Cycles firstResponseTime,
                            Cycles completionTime);

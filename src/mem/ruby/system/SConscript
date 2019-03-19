@@ -30,6 +30,11 @@
 
 Import('*')
 
+DebugFlag('myflag')
+DebugFlag('myflag1')
+DebugFlag('myflag2')
+DebugFlag('myflag3')
+DebugFlag('missflag')
 if env['PROTOCOL'] == 'None':
     Return()
 
@@ -52,3 +57,4 @@ Source('Sequencer.cc')
 if env['BUILD_GPU']:
     Source('VIPERCoalescer.cc')
 Source('WeightedLRUPolicy.cc')
+DebugFlag('My_Flag')
