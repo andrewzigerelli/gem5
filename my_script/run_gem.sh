@@ -113,7 +113,7 @@ if [ "$1" = "--fs-options" ]; then
 fi
 
 #OUT_DIR="./"output"/"$DISK_IMAGE"/"$KERNEL"/L2_size_"$L2_SIZE
-OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$DISK_IMAGE"/"$KERNEL
+OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
