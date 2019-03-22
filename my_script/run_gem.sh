@@ -164,7 +164,7 @@ $KERNEL --disk-image $DISK_IMAGE --cpu-type=$CPU_TYPE
 --restore-with-cpu=$CKPT_CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS -r 1"
 BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
 #BENCH_DEBUG_FLAG=My_Flag
-BENCH_DEBUG_FLAG=RubyCache
+BENCH_DEBUG_FLAG=stallflag
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"

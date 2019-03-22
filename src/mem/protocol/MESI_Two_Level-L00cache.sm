@@ -210,6 +210,7 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   // ACTIONS
   action(printrequest, "pf", desc="...") {
      DPRINTF(bufferflag, "i love andrew\n");
+    DPRINTF(numflag, "andrew\n");
     Tick a := clockEdge();
     Cycles b := ticksToCycles(a);
     DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
