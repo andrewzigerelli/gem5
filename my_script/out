@@ -1,0 +1,40 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 compiled Mar 21 2019 00:35:55
+gem5 started Mar 21 2019 00:36:15
+gem5 executing on liu-MS-7996, pid 4142
+command line: /home/liu/gemn/gem5/build/X86_MESI_Two_Level/gem5.opt --outdir=/home/liu/gemn/gem5/my_script/output/X86_MESI_Two_Level/ubuntu-16.img/vmlinux_4.19.0/511.povray_r_readfile_0/ /home/liu/gemn/gem5/configs/example/fs.py --checkpoint-dir=/home/liu/gemn/gem5/my_script/checkpoints/X86_MESI_Two_Level --script /home/liu/gemn/gem5/my_script/readfiles/511.povray_r_readfile_0 --kernel vmlinux_4.19.0 --disk-image ubuntu-16.img --cpu-type=DerivO3CPU --restore-with-cpu=AtomicSimpleCPU --maxinsts=100000000 --mem-size 2GB --num-cpus 2 --caches --l2cache --num-dirs=2 --num-l2caches=2 --num-l3caches=2 --l1d_size=32kB --l1i_size=32kB --l2_size=2MB --l3_size=2MB --l1d_assoc=8 --l1i_assoc=8 --l2_assoc=16 --l3_assoc=8 --ruby -r 1 --command-line 'earlyprintk=ttyS0 console=ttyS0 console_msg_format=syslog lpj=7999923 panic=-1 printk.devkmsg=on printk.time=y rw root=/dev/sda2'
+
+l1
+<orphan LinuxX86System>.ruby.l1_cntrl0
+l1
+<orphan LinuxX86System>.ruby.l1_cntrl1
+<orphan L0Cache>
+before exec l0
+after exec l0
+<orphan LinuxX86System>.ruby.l0_cntrl0
+i love andrew
+
+i love andrew
+
+after response
+
+<orphan L0Cache>
+before exec l0
+after exec l0
+<orphan LinuxX86System>.ruby.l0_cntrl1
+i love andrew
+
+i love andrew
+
+after response
+
+Global frequency set at 1000000000000 ticks per second
+      0: rtc: Real-time clock set to Sun Jan  1 00:00:00 2012
+Switch at curTick count:10000
+Switched CPUS @ tick 2508364162500
+switching cpus
+**** REAL SIMULATION ****
+2820010349000: system.pc.com_1.device: attach terminal 0
+Exiting @ tick 3295964730500 because a thread reached the max instruction count

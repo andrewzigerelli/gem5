@@ -43,6 +43,10 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   MessageBuffer * responseFromL2Cache, network="To", virtual_network="1",
     vnet_type="response";  // this L2 bank -> a local L1 || Memory
 
+  //yanan for stall
+  MessageBuffer * stallRequestFromL2Cache, network="To", virtual_network="4",
+    vnet_type="request"; //this L2 bank -> a local L1
+
   // FROM the network to this local bank of L2 cache
   MessageBuffer * unblockToL2Cache, network="From", virtual_network="2",
     vnet_type="unblock";  // a local L1 || Memory -> this L2 bank
@@ -126,6 +130,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     DataBlock DataBlk,       desc="data for the block";
     bool Dirty, default="false", desc="data is dirty";
     //yanan
+    bool sharer0, default="true", desc="";
+    bool sharer1, default="false", desc="";
   }
 
   // TBE fields
@@ -291,7 +297,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   out_port(L1RequestL2Network_out, RequestMsg, L1RequestFromL2Cache);
   out_port(DirRequestL2Network_out, RequestMsg, DirRequestFromL2Cache);
   out_port(responseL2Network_out, ResponseMsg, responseFromL2Cache);
-
+  //yanan
+  out_port(stallRequest_out, RequestMsg, stallRequestFromL2Cache);
 
   in_port(L1unblockNetwork_in, ResponseMsg, unblockToL2Cache, rank = 2) {
     if(L1unblockNetwork_in.isReady(clockEdge())) {
@@ -398,6 +405,28 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
 
 
   // ACTIONS
+  
+  // yanan for set stall flag
+  action(Flag_Set, "fs", desc="ssss") {
+    int stall_flag;
+    peek(L1RequestL2Network_in, RequestMsg){
+       NodeID stall := machineIDToNodeID(in_msg.Requestor);
+       stall_flag := L2cache.setSetFlag(address, stall);
+       DPRINTF(stallflag, "%d\n", stall_flag);
+       if(stall_flag == 1)
+       {
+          enqueue(stallRequest_out, RequestMsg, to_l1_latency) {
+            out_msg.addr := address;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+          }   
+       }
+    }
+  }    
+
+
+
 
   action(a_issueFetchToMemory, "a", desc="fetch data from memory") {
     peek(L1RequestL2Network_in, RequestMsg) {
@@ -749,6 +778,28 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     }
   }
 
+//yanan
+  action(yy_addSharer, "\ny", desc="Add L1 sharer only for detection") {
+    peek(L1RequestL2Network_in, RequestMsg) {
+      assert(is_valid(cache_entry));
+      if(L2cache.NodeToInt(machineIDToNodeID(in_msg.Requestor)) == 0) {      
+        cache_entry.sharer0 := true;
+      }else {
+        cache_entry.sharer1 := true;
+      }
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
   action(nnu_addSharerFromUnblock, "\nu", desc="Add L1 sharer to list") {
     peek(L1unblockNetwork_in, ResponseMsg) {
       assert(is_valid(cache_entry));
@@ -841,10 +892,14 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     qq_allocateL2CacheBlock;
     ll_clearSharers;
     nn_addSharer;
+    //yanan
+    yy_addSharer;
     i_allocateTBE;
     ss_recordGetSL1ID;
     a_issueFetchToMemory;
     uu_profileMiss;
+    //yanan
+    Flag_Set;
     jj_popL1RequestQueue;
   }
 
@@ -852,10 +907,14 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     qq_allocateL2CacheBlock;
     ll_clearSharers;
     nn_addSharer;
+    //yanan
+    yy_addSharer;
     i_allocateTBE;
     ss_recordGetSL1ID;
     a_issueFetchToMemory;
     uu_profileMiss;
+     //yanan     
+     Flag_Set;
     jj_popL1RequestQueue;
   }
 
@@ -867,6 +926,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     xx_recordGetXL1ID;
     a_issueFetchToMemory;
     uu_profileMiss;
+    //yanan
+    Flag_Set;
     jj_popL1RequestQueue;
   }
 
@@ -898,6 +959,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   transition({IS, ISS}, {L1_GETS, L1_GET_INSTR}, IS) {
     nn_addSharer;
     ss_recordGetSL1ID;
+    //yanan
+    yy_addSharer;
     uu_profileMiss;
     jj_popL1RequestQueue;
   }
@@ -914,6 +977,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   transition(SS, {L1_GETS, L1_GET_INSTR}) {
     ds_sendSharedDataToRequestor;
     nn_addSharer;
+    //yanan
+    yy_addSharer;
     set_setMRU;
     uu_profileHit;
     jj_popL1RequestQueue;
@@ -960,6 +1025,8 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   transition(M, L1_GET_INSTR, SS) {
     d_sendDataToRequestor;
     nn_addSharer;
+    //yanan
+    yy_addSharer;
     set_setMRU;
     uu_profileHit;
     jj_popL1RequestQueue;

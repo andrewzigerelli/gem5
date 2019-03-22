@@ -363,6 +363,19 @@ class SortedIncludes(Verifier):
         new = list(self.sort_includes(old, norm_fname, language))
 
         modified = _modified_regions(old, new) & regions
+        if modified:
+            gem_path = os.environ['GEM5_PATH']
+            new_filename = os.path.join(gem_path, 'new.txt')
+            old_filename = os.path.join(gem_path, 'old.txt')
+            # remove old versions
+            with open(new_filename, "a") as f:
+                f.write(filename + " new\n")
+                for l in new:
+                    f.write(l+'\n')
+            with open(old_filename, "a") as f:
+                f.write(filename + " old\n")
+                for l in old:
+                    f.write(l+'\n')
 
         if modified:
             if not silent:

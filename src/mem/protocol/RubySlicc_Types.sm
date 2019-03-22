@@ -210,17 +210,15 @@ structure (CacheMemory, external = "yes") {
   void setMRU(AbstractCacheEntry);
   void recordRequestType(CacheRequestType, Addr);
   bool checkResourceAvailable(CacheResourceType, Addr);
+  //yanan  
+  int setSetFlag(Addr, NodeID);
+  void setSetFlag_2(Addr);  
+  bool checkFlag(Addr);  
+  int NodeToInt(NodeID);
 
   int getCacheSize();
   int getNumBlocks();
   Addr getAddressAtIdx(int);
-
-  //andrew
-  void insertRCTEntry(Addr, Cycles);
-  bool isRCTFull(Addr);
-  void cleanRCTBuffer(Cycles);
-
-
 
   Scalar demand_misses;
   Scalar demand_hits;

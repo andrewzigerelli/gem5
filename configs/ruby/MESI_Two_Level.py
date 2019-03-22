@@ -40,6 +40,9 @@ from Ruby import send_evicts
 class L1Cache(RubyCache): pass
 class L2Cache(RubyCache): pass
 
+###yanan###
+class L0Cache(RubyCache): pass
+
 def define_options(parser):
     return
 
@@ -56,16 +59,21 @@ def create_system(options, full_system, system, dma_ports, bootmem,
     # consistent with the NetDest list.  Therefore the l1 controller nodes must be
     # listed before the directory nodes and directory nodes before dma nodes, etc.
     #
+    ##yanan
     l1_cntrl_nodes = []
+    l0_cntrl_nodes = []
     l2_cntrl_nodes = []
     dma_cntrl_nodes = []
-
     #
     # Must create the individual controllers before the network to ensure the
     # controller constructors are called before the network constructor
     #
     l2_bits = int(math.log(options.num_l2caches, 2))
     block_size_bits = int(math.log(options.cacheline_size, 2))
+
+
+
+    l2_index_start = block_size_bits + l2_bits
 
     for i in xrange(options.num_cpus):
         #
@@ -74,11 +82,19 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1i_cache = L1Cache(size = options.l1i_size,
                             assoc = options.l1i_assoc,
                             start_index_bit = block_size_bits,
-                            is_icache = True)
+                            is_icache = True,
+                            start_index_bit_2 = l2_index_start,
+                            size_2 = options.l2_size,
+                            assoc_2 = options.l2_assoc
+                            )
         l1d_cache = L1Cache(size = options.l1d_size,
                             assoc = options.l1d_assoc,
                             start_index_bit = block_size_bits,
-                            is_icache = False)
+                            is_icache = False,
+                            start_index_bit_2 = l2_index_start,
+                            size_2 = options.l2_size,
+                            assoc_2 = options.l2_assoc
+                            )
 
         prefetcher = RubyPrefetcher.Prefetcher()
 
@@ -112,6 +128,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl.sequencer = cpu_seq
         exec("ruby_system.l1_cntrl%d = l1_cntrl" % i)
 
+        print("l1")
+        print(l1_cntrl)
         # Add controllers and sequencers to the appropriate lists
         cpu_sequencers.append(cpu_seq)
         l1_cntrl_nodes.append(l1_cntrl)
@@ -120,6 +138,15 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl.mandatoryQueue = MessageBuffer()
         l1_cntrl.requestFromL1Cache = MessageBuffer()
         l1_cntrl.requestFromL1Cache.master = ruby_system.network.slave
+
+        #####yanan
+        l1_cntrl.requestToBuff = MessageBuffer()
+        l1_cntrl.requestToBuff.master = ruby_system.network.slave
+        l1_cntrl.responseFromBuff = MessageBuffer()
+        l1_cntrl.responseFromBuff.slave = ruby_system.network.master
+        l1_cntrl.stallRequestFromL2 = MessageBuffer()
+        l1_cntrl.stallRequestFromL2.slave = ruby_system.network.master
+
         l1_cntrl.responseFromL1Cache = MessageBuffer()
         l1_cntrl.responseFromL1Cache.master = ruby_system.network.slave
         l1_cntrl.unblockFromL1Cache = MessageBuffer()
@@ -133,6 +160,40 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl.responseToL1Cache.slave = ruby_system.network.master
 
 
+###yanan###
+    for i in xrange(options.num_cpus):
+
+        l0_cache = L0Cache(size = options.l2_size,
+                           assoc = options.l2_assoc,
+                           start_index_bit = block_size_bits,
+                           start_index_bit_2 = l2_index_start,
+                           size_2 = options.l2_size,
+                           assoc_2 = options.l2_assoc
+                           )
+        print(l0_cache)
+
+        l0_cntrl = L0Cache_Controller(version = i,
+                                      L0cache = l0_cache,
+                                      transitions_per_cycle = options.ports,
+                                      ruby_system = ruby_system)
+        print("before exec l0")
+        exec("ruby_system.l0_cntrl%d = l0_cntrl" % i)
+        print("after exec l0")
+        print(l0_cntrl)
+        l0_cntrl_nodes.append(l0_cntrl)
+        print("i love andrew\n")
+        l0_cntrl.buffrequest = MessageBuffer()
+        print("i love andrew\n")
+        l0_cntrl.buffrequest.slave = ruby_system.network.master
+        l0_cntrl.buffresponse = MessageBuffer()
+        l0_cntrl.buffresponse.master = ruby_system.network.slave
+        print("after response\n")
+
+
+
+
+
+
     l2_index_start = block_size_bits + l2_bits
 
     for i in xrange(options.num_l2caches):
@@ -141,7 +202,11 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         #
         l2_cache = L2Cache(size = options.l2_size,
                            assoc = options.l2_assoc,
-                           start_index_bit = l2_index_start)
+                           start_index_bit = l2_index_start,
+                           start_index_bit_2 = l2_index_start,
+                           size_2 = options.l2_size,
+                           assoc_2 = options.l2_assoc
+                           )
 
         l2_cntrl = L2Cache_Controller(version = i,
                                       L2cache = l2_cache,
@@ -165,7 +230,9 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l2_cntrl.L1RequestToL2Cache.slave = ruby_system.network.master
         l2_cntrl.responseToL2Cache = MessageBuffer()
         l2_cntrl.responseToL2Cache.slave = ruby_system.network.master
-
+        ##yanan
+        l2_cntrl.stallRequestFromL2Cache = MessageBuffer()
+        l2_cntrl.stallRequestFromL2Cache.master = ruby_system.network.slave
 
     # Run each of the ruby memory controllers at a ratio of the frequency of
     # the ruby system
@@ -209,7 +276,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         dma_cntrl.requestToDir = MessageBuffer()
         dma_cntrl.requestToDir.master = ruby_system.network.slave
 
-    all_cntrls = l1_cntrl_nodes + \
+    all_cntrls = l0_cntrl_nodes + \
+                 l1_cntrl_nodes + \
                  l2_cntrl_nodes + \
                  dir_cntrl_nodes + \
                  dma_cntrl_nodes
@@ -232,7 +300,7 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         io_controller.requestToDir.master = ruby_system.network.slave
 
         all_cntrls = all_cntrls + [io_controller]
-
-    ruby_system.network.number_of_virtual_networks = 3
+    ####yanan
+    ruby_system.network.number_of_virtual_networks = 5
     topology = create_topology(all_cntrls, options)
     return (cpu_sequencers, mem_dir_cntrl_nodes, topology)

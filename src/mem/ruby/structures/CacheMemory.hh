@@ -43,7 +43,6 @@
 #include "mem/ruby/slicc_interface/RubySlicc_ComponentMapping.hh"
 #include "mem/ruby/structures/AbstractReplacementPolicy.hh"
 #include "mem/ruby/structures/BankedArray.hh"
-#include "mem/ruby/structures/RCTBuffer.hh" //andrew
 #include "mem/ruby/system/CacheRecorder.hh"
 #include "params/RubyCache.hh"
 #include "sim/sim_object.hh"
@@ -110,7 +109,11 @@ class CacheMemory : public SimObject
     void setMRU(Addr addr, int occupancy);
     int getReplacementWeight(int64_t set, int64_t loc);
     void setMRU(const AbstractCacheEntry *e);
-
+    //yanan
+    int setSetFlag(Addr CacheSet, int ID);
+    void setSetFlag_2(Addr address);
+    bool checkFlag(Addr address);
+    int NodeToInt(NodeID id);
     // Functions for locking and unlocking cache lines corresponding to the
     // provided address.  These are required for supporting atomic memory
     // accesses.  These are to be used when only the address of the cache entry
@@ -152,17 +155,11 @@ class CacheMemory : public SimObject
     int getNumBlocks() const { return m_cache_num_sets * m_cache_assoc; }
     Addr getAddressAtIdx(int idx) const;
 
-    //andrew
-    void insertRCTEntry(Addr address, Cycles ret_cycle); //rct
-    bool isRCTFull(Addr address);
-    void cleanRCTBuffer(Cycles cur_cycle);
-
-
-
   private:
     // convert a Address to its location in the cache
     int64_t addressToCacheSet(Addr address) const;
-
+    //yanan
+    int64_t addressToCacheSet_2(Addr address) const;
     // Given a cache tag: returns the index of the tag in a set.
     // returns -1 if the tag is not found.
     int findTagInSet(int64_t line, Addr tag) const;
@@ -193,11 +190,16 @@ class CacheMemory : public SimObject
     int m_start_index_bit;
     bool m_resource_stalls;
     int m_block_size;
+    //yanan
+    int m_cache_assoc_2;
+    int m_cache_size_2;
+    int m_start_index_bit_2;
+    int m_cache_num_sets_2;
+    int m_cache_num_set_bits_2;
+    //yanan stall flag
 
-    //andrew
-    //rct structure
-    RCTBuffer rct_buffer;
-    //std::map<Addr, Cycles> rct_buffer;
+    int flag[10000][2];
+    int stall_flag[10000];
 };
 
 std::ostream& operator<<(std::ostream& out, const CacheMemory& obj);

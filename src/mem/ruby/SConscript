@@ -43,10 +43,7 @@ Import('*')
 
 if env['PROTOCOL'] == 'None':
     Return()
-#andrew yanan
-DebugFlag('RCTStats')
-DebugFlag('RCT')
-DebugFlag('CacheTest')
+DebugFlag('alphaflag')
 DebugFlag('bufferflag')
 DebugFlag('testflag')
 DebugFlag('ProtocolTrace')
@@ -64,7 +61,7 @@ DebugFlag('RubySystem')
 DebugFlag('RubyTester')
 DebugFlag('RubyStats')
 DebugFlag('RubyResourceStalls')
-
+DebugFlag('stallflag')
 CompoundFlag('Ruby', [ 'RubyQueue', 'RubyNetwork', 'RubyTester',
     'RubyGenerated', 'RubySlicc', 'RubySystem', 'RubyCache',
     'RubyDma', 'RubyPort', 'RubySequencer', 'RubyCacheTrace',
@@ -137,7 +134,6 @@ MakeInclude('structures/DirectoryMemory.hh')
 MakeInclude('structures/PerfectCacheMemory.hh')
 MakeInclude('structures/PersistentTable.hh')
 MakeInclude('structures/Prefetcher.hh')
-MakeInclude('structures/RCTBuffer.hh') #andrew
 MakeInclude('structures/TBETable.hh')
 MakeInclude('structures/TimerTable.hh')
 MakeInclude('structures/WireBuffer.hh')

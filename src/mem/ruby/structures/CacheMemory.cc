@@ -26,17 +26,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "mem/ruby/structures/CacheMemory.hh"
 
 #include "base/intmath.hh"
 #include "base/logging.hh"
-#include "debug/CacheTest.hh" //andrew
-#include "debug/RCT.hh" //andrew
 #include "debug/RubyCache.hh"
 #include "debug/RubyCacheTrace.hh"
 #include "debug/RubyResourceStalls.hh"
 #include "debug/RubyStats.hh"
+#include "debug/stallflag.hh"
 #include "mem/protocol/AccessPermission.hh"
 #include "mem/ruby/system/RubySystem.hh"
 #include "mem/ruby/system/WeightedLRUPolicy.hh"
@@ -62,14 +60,17 @@ CacheMemory::CacheMemory(const Params *p)
     dataArray(p->dataArrayBanks, p->dataAccessLatency,
               p->start_index_bit, p->ruby_system),
     tagArray(p->tagArrayBanks, p->tagAccessLatency,
-             p->start_index_bit, p->ruby_system),
-    rct_buffer(p)
+             p->start_index_bit, p->ruby_system)
 {
     m_cache_size = p->size;
     m_cache_assoc = p->assoc;
     m_replacementPolicy_ptr = p->replacement_policy;
     m_replacementPolicy_ptr->setCache(this);
     m_start_index_bit = p->start_index_bit;
+    //yanan
+    m_cache_size_2 = p->size_2;
+    m_cache_assoc_2 = p->assoc_2;
+    m_start_index_bit_2 = p->start_index_bit_2;
     m_is_instruction_only_cache = p->is_icache;
     m_resource_stalls = p->resourceStalls;
     m_block_size = p->block_size;  // may be 0 at this point. Updated in init()
@@ -82,12 +83,23 @@ CacheMemory::init()
         m_block_size = RubySystem::getBlockSizeBytes();
     }
     m_cache_num_sets = (m_cache_size / m_cache_assoc) / m_block_size;
+    m_cache_num_sets_2 = (m_cache_size_2 / m_cache_assoc_2) / m_block_size;
     assert(m_cache_num_sets > 1);
     m_cache_num_set_bits = floorLog2(m_cache_num_sets);
+    m_cache_num_set_bits_2 = floorLog2(m_cache_num_sets_2);
     assert(m_cache_num_set_bits > 0);
-
+    //yanan
+    for (int i = 0; i<10000; i++) stall_flag[i]=0;
+    for (int i=0; i<10000; i++)
+    {
+        for (int j=0; j<2; j++) flag[i][j] = 0;
+    }
     m_cache.resize(m_cache_num_sets,
                     std::vector<AbstractCacheEntry*>(m_cache_assoc, nullptr));
+    //DPRINTF(stallflag, "after resize num sets %d, assoc\n", m_cache_num_sets,
+    //        m_cache_assoc);
+    //DPRINTF(stallflag, "l2 set size %d, assoc %d, set num %d\n",
+    //m_cache_size_2, m_cache_assoc_2, m_cache_num_sets_2);
 }
 
 CacheMemory::~CacheMemory()
@@ -109,6 +121,52 @@ CacheMemory::addressToCacheSet(Addr address) const
     return bitSelect(address, m_start_index_bit,
                      m_start_index_bit + m_cache_num_set_bits - 1);
 }
+//yanan only used for L1 stalling
+int64_t
+CacheMemory::addressToCacheSet_2(Addr address) const
+{
+    return bitSelect(address, m_start_index_bit_2,
+                     m_start_index_bit_2 + m_cache_num_set_bits_2 - 1);
+}
+
+void
+CacheMemory::setSetFlag_2(Addr address)
+{
+    int64_t CacheSet = addressToCacheSet_2(address);
+    stall_flag[CacheSet] = 1;
+    DPRINTF(stallflag, "set in l1 %d\n", CacheSet);
+}
+
+bool CacheMemory::checkFlag(Addr address)
+{
+    int64_t CacheSet = addressToCacheSet_2(address);
+    if (stall_flag[CacheSet] == 1)
+        return true;
+    return false;
+}
+
+
+//yanan for detection
+int
+CacheMemory::setSetFlag(Addr address, int ID)
+{
+    int64_t CacheSet = addressToCacheSet(address);
+  //  ID = (int)ID;
+    DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
+    if (flag[CacheSet][ID] < (m_cache_assoc))flag[CacheSet][ID] ++;
+    if (flag[CacheSet][ID] == (m_cache_assoc)) return 1 ;
+
+    else return 0;
+}
+
+int CacheMemory::NodeToInt(NodeID id)
+{
+    return id;
+
+}
+
+
+
 
 // Given a cache index: returns the index of the tag in a set.
 // returns -1 if the tag is not found.
@@ -655,19 +713,4 @@ bool
 CacheMemory::isBlockNotBusy(int64_t cache_set, int64_t loc)
 {
   return (m_cache[cache_set][loc]->m_Permission != AccessPermission_Busy);
-}
-//andrew
-void
-CacheMemory::insertRCTEntry(Addr address, Cycles ret_cycle){
-    rct_buffer.insert(address, ret_cycle);
-}
-bool
-CacheMemory::isRCTFull(Addr address) {
-    return rct_buffer.isFull(address);
-
-}
-void
-CacheMemory::cleanRCTBuffer(Cycles cur_cycle) {
-    return rct_buffer.removeOldEntries(cur_cycle);
-
 }

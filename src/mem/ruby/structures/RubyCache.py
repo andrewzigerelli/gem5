@@ -43,6 +43,10 @@ class RubyCache(SimObject):
     start_index_bit = Param.Int(6, "index start, default 6 for 64-byte line");
     is_icache = Param.Bool(False, "is instruction only cache");
     block_size = Param.MemorySize("0B", "block size in bytes. 0 means default RubyBlockSize")
+    ##yanan
+    start_index_bit_2 = Param.Int(6, "ddddd");
+    size_2 = Param.MemorySize("capacity in bytes");
+    assoc_2 = Param.Int("");
 
     dataArrayBanks = Param.Int(1, "Number of banks for the data array")
     tagArrayBanks = Param.Int(1, "Number of banks for the tag array")
@@ -50,7 +54,3 @@ class RubyCache(SimObject):
     tagAccessLatency = Param.Cycles(1, "cycles for a tag array access")
     resourceStalls = Param.Bool(False, "stall if there is a resource failure")
     ruby_system = Param.RubySystem(Parent.any, "")
-
-    ## andrew
-    rct_size = Param.Int(100, "Number of entries in RCT buffer")
-    num_ctrs = Param.Int(10, "Number of counters per entry")

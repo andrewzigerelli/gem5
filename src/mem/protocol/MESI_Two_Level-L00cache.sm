@@ -28,7 +28,7 @@
 
 machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
  : CacheMemory * L0cache;
-   Cycles random_latency := 100;
+   Cycles random_latency := 50;
 
    // Message Queues
    // From this node's L1 cache TO the network
@@ -107,10 +107,6 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   void wakeUpBuffers(Addr a);
   void profileMsgDelay(int virtualNetworkType, Cycles c);
   int a;
-
-  //andrew
-  Cycles curCycle();
-
 
   // inclusive cache returns L1 entries only
   Entry getCacheEntry(Addr addr), return_by_pointer="yes" {
@@ -201,8 +197,8 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
       peek(request_in, RequestMsg) {
         Entry cache_entry := getCacheEntry(in_msg.addr);
         if(is_valid(cache_entry)){
+              DPRINTF(RubyCache, "MADE IT HERE WTF\n");
            } else {
-
             trigger(Event:Load, in_msg.addr, cache_entry,
                     TBEs[in_msg.addr]);    
       }
@@ -212,9 +208,12 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
 
 
   // ACTIONS
-  //andrew
   action(printrequest, "pf", desc="...") {
-    //DPRINTF(RCT, "addr L0 %d\n", address);
+     DPRINTF(bufferflag, "i love andrew\n");
+    Tick a := clockEdge();
+    Cycles b := ticksToCycles(a);
+    DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
+    DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
     peek(request_in, RequestMsg) {
        enqueue(responseFromBuff, ResponseMsg, random_latency) {
         out_msg.addr := address;
@@ -225,17 +224,8 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
         out_msg.Destination.add(in_msg.Requestor);
         out_msg.MessageSize := MessageSizeType:Response_Data;
        }
-       /* remove old entries */
-       L0cache.cleanRCTBuffer(curCycle());
-       if(!L0cache.isRCTFull(address)) {
-           DPRINTF(RCT, 'yes');
-           DPRINTF(RCT, "we can insert!\n");
-           L0cache.insertRCTEntry(address, curCycle()+random_latency);
-       }
-       else{
-           DPRINTF(RCT, "RCT is full!\n");
-       }
     }
+
   }
   action(k_popRequestQueue, "k", desc="Pop request queue.") {
     request_in.dequeue(clockEdge());
@@ -251,7 +241,6 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   transition({NP,I}, Load) {
     printrequest;
     k_popRequestQueue;
-    
   }
 
 
