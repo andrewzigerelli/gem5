@@ -72,7 +72,7 @@ CMD_LINE='earlyprintk=ttyS0 console=ttyS0 console_msg_format=syslog lpj=7999923 
 #### SET UP GEM5 OPTIONS FOR FS.PY
 # we don't distinguish between ruby and non ruby checkpoints
 # we save checkpoints in own paths for convenience
-CKPT_DIR=$GEM5_PATH"/"my_script"/"checkpoints"/"$BUILD
+CKPT_DIR=$GEM5_PATH"/"my_script"/"checkpoints"/"$BUILD"/"$CORE_NUM"_core"
 
 
 ### readfile for gem5
