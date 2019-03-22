@@ -55,7 +55,9 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
    MessageBuffer * requestToBuff, network="To", virtual_network="3", 
         vnet_type="request";
 
-
+   //yanan delay for L0
+//   MessageBuffer * requestToBuff, network="To", virtual_network="4",
+//        vnet_type="request";
 
    // To this node's L1 cache FROM the network
    // a L2 bank -> this L1
@@ -230,6 +232,15 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     }
     return State:NP;
   }
+//yanan get state function for stall
+  State getState_S(Entry cache_entry, Addr addr) {
+    assert((L1Dcache.isTagPresent(addr) && L1Icache.isTagPresent(addr)) == false);
+
+    if (is_valid(cache_entry)) {
+          return cache_entry.CacheState;
+    }
+    return State:NP;
+  }
 
   void setState(TBE tbe, Entry cache_entry, Addr addr, State state) {
     assert((L1Dcache.isTagPresent(addr) && L1Icache.isTagPresent(addr)) == false);
@@ -304,6 +315,38 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     }
   }
 
+  //yanan event for L1 load store
+  Event mandatory_request_type_to_event_S(RubyRequestType type) {
+    DPRINTF(bufferflag, "request type %s \n", type);
+    if (type == RubyRequestType:LD) {
+      return Event:Load_S;
+    } else if (type == RubyRequestType:IFETCH) {
+      return Event:Ifetch_S;
+    } else if ((type == RubyRequestType:ST) || (type == RubyRequestType:ATOMIC)) {
+      return Event:Store;
+    } else {
+      error("Invalid RubyRequestType");
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Event prefetch_request_type_to_event(RubyRequestType type) {
       if (type == RubyRequestType:LD) {
           return Event:PF_Load;
@@ -353,9 +396,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     in_port(stallRequest_in, RequestMsg, stallRequestFromL2, desc="....") {
       if(stallRequest_in.isReady(clockEdge())) {
         peek(stallRequest_in, RequestMsg, block_on="addr") {
-            DPRINTF(stallflag, "stall address %d\n", in_msg.addr);
-            DPRINTF(bufferflag, "stall address %d\n", in_msg.addr);
-            DPRINTF(alphaflag, "stall address %d\n", in_msg.addr);
+            DPRINTF(stallflag, "stall address %llx\n", in_msg.addr);
             L1Icache.setSetFlag_2(in_msg.addr);
             L1Dcache.setSetFlag_2(in_msg.addr);
         }
@@ -476,7 +517,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
         if(in_msg.Type == CoherenceResponseType:DATA_EXCLUSIVE) {
           if(L1Dcache.checkFlag(in_msg.addr) && 
                 ((getState(tbe, cache_entry, in_msg.addr) == State:IS)||
-                  (getState(tbe, cache_entry, in_msg.addr) == State:IS_I)) ){ 
+                  (getState(tbe, cache_entry, in_msg.addr) == State:IS_I)) ){
+          DPRINTF(bufferflag, "stall1 l2 to l1 addr %llx\n", in_msg.addr); 
           trigger(Event:Data_Exclusive_S, in_msg.addr, cache_entry, tbe);
           } else{
           trigger(Event:Data_Exclusive, in_msg.addr, cache_entry, tbe);
@@ -489,12 +531,15 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
               machineIDToMachineType(in_msg.Sender) == MachineType:L1Cache) {
               if(L1Dcache.checkFlag(in_msg.addr) && 
                   (getState(tbe, cache_entry, in_msg.addr) == State:IS)){
+                DPRINTF(bufferflag, "stall2 l2 to l1 addr %llx\n",
+                in_msg.addr);
                 trigger(Event:DataS_fromL1_S, in_msg.addr, cache_entry, tbe);
               } else {
                 trigger(Event:DataS_fromL1, in_msg.addr, cache_entry, tbe);}
           } else if ( (getPendingAcks(tbe) - in_msg.AckCount) == 0 ) {
             if(L1Dcache.checkFlag(in_msg.addr) && 
                 (getState(tbe, cache_entry, in_msg.addr) == State:IS)){
+               DPRINTF(bufferflag, "stall3 l2 to l1 addr %llx\n", in_msg.addr);
                trigger(Event:Data_all_Acks_S, in_msg.addr, cache_entry, tbe);
              }else {
                trigger(Event:Data_all_Acks, in_msg.addr, cache_entry, tbe);}
@@ -508,6 +553,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
             trigger(Event:Ack, in_msg.addr, cache_entry, tbe);
           }
         } else if (in_msg.Type == CoherenceResponseType:WB_ACK) {
+          DPRINTF(bufferflag, "state wb ack %s\n", getState(tbe, cache_entry,
+in_msg.addr));
           trigger(Event:WB_Ack, in_msg.addr, cache_entry, tbe);
         } else {
           error("Invalid L1 response type");
@@ -552,6 +599,15 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
         DPRINTF(bufferflag, "physical addr in manda %llx\n", in_msg.PhysicalAddress);
         //Tick currentTime := clockEdge();
         //Cycles ldtime := ticksToCycles(currentTime);
+        //yanan latency for L0
+        //enqueue(delayToL0_out, RequestMsg, )
+
+
+
+
+
+
+
         // Check for data access to blocks in I-cache and ifetchs to blocks in D-cache
         if (in_msg.Type == RubyRequestType:IFETCH) {
           // ** INSTRUCTION ACCESS ***
@@ -562,10 +618,20 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
             DPRINTF(bufferflag, "state after mandatory %s\n",
                     L1Icache_entry.CacheState);
             DPRINTF(bufferflag, "1\n");
-            trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
-                    L1Icache_entry, TBEs[in_msg.LineAddress]);
-          } else {
-
+            if(L1Icache.checkFlag(in_msg.LineAddress) && (
+                getState_S(L1Icache_entry, in_msg.LineAddress) == State:E ||
+                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_EE ||
+                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:M ||
+                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_MM ||
+                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:S ||
+                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_SS)){
+                DPRINTF(bufferflag, "icache stall\n");
+                 trigger(mandatory_request_type_to_event_S(in_msg.Type), in_msg.  
+                           LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);}
+                 else{
+                trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.  
+                      LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);}
+          }else{
             // Check to see if it is in the OTHER L1
             Entry L1Dcache_entry := getL1DCacheEntry(in_msg.LineAddress);
             if (is_valid(L1Dcache_entry)) {
@@ -601,9 +667,19 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
              DPRINTF(bufferflag, "state in manda %s\n",
                     L1Dcache_entry.CacheState);
              DPRINTF(bufferflag, "5\n");
-              // No room in the L1, so we need to make room in the L1
+            if(L1Dcache.checkFlag(in_msg.LineAddress) && (
+                getState_S(L1Dcache_entry, in_msg.LineAddress) == State:E ||
+                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_EE ||
+                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:M ||
+                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_MM ||
+                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:S ||
+                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_SS)){
+                DPRINTF(bufferflag, "dcache stall\n");
+                 trigger(mandatory_request_type_to_event_S(in_msg.Type), in_msg.
+                        LineAddress, L1Dcache_entry, TBEs[in_msg.LineAddress]);}
+            else {
             trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
-                    L1Dcache_entry, TBEs[in_msg.LineAddress]);
+                    L1Dcache_entry, TBEs[in_msg.LineAddress]);}
           } else {
             // Check to see if it is in the OTHER L1
             Entry L1Icache_entry := getL1ICacheEntry(in_msg.LineAddress);
@@ -620,7 +696,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
               // L1 does't have the line, but we have space for it
               // in the L1 let's see if the L2 has it.
               DPRINTF(bufferflag, "7\n");
-              // No room in the L1, so we need to make room in the L1
+              DPRINTF(bufferflag, "state in 7 %s\n", getState_S(L1Dcache_entry, in_msg.  
+                        LineAddress) );
               trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
                       L1Dcache_entry, TBEs[in_msg.LineAddress]);
             } else {
@@ -659,7 +736,10 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   //yanan
   action(testprint_fwd, "tf", desc="###") {
    DPRINTF(stallflag, "stall fwd %d\n", address);
-         
+  }
+  
+  action(PRINTFTEST, "PT", desc="")  {
+    DPRINTF(bufferflag, "7 state correct %llx\n", address);      
   }
 
   //yanan
@@ -977,7 +1057,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     peek(responseL1Network_in, ResponseMsg) {
        DPRINTF(bufferflag, "send buffer addr%llx\n", address);
        enqueue(requestToBuff_out, RequestMsg, l1_request_latency) {
-       DPRINTF(bufferflag, "addr in sendbuffer%llx\n", address);
+       DPRINTF(numflag, "%llx\n", address);
        //DPRINTF(bufferflag, "physicaladdr%llx\n", in_msg.PhysicalAddress);
        out_msg.Requestor := machineID;
        out_msg.Type := CoherenceRequestType:BUFFREQ;
@@ -997,6 +1077,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   action(sendbuffer_h, "sb_h", desc="send test request to buffer") {
     peek(mandatoryQueue_in, RubyRequest) {
        DPRINTF(bufferflag, "send buffer addr_h %llx\n", address);
+       DPRINTF(numflag, "%llx\n", address);
        enqueue(requestToBuff_out, RequestMsg, l1_request_latency) {
           out_msg.Requestor := machineID;
           out_msg.Type := CoherenceRequestType:BUFFREQ;
@@ -1325,6 +1406,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
 
   transition({NP,I}, Load, IS) {
     oo_allocateL1DCacheBlock;
+    PRINTFTEST;
     i_allocateTBE;
     a_issueGETS;
     uu_profileDataMiss;
@@ -1415,7 +1497,63 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   }
   //yanan
   // Transitions from Shared
-  transition({S, SB_SS}, Load, SB_SS) {
+  transition({S, SB_SS}, Load_S, SB_SS) {
+    //yanan
+    //h_load_hit;
+    sendbuffer_h;
+    uu_profileDataHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+  transition(S, Load, S) {
+    //yanan
+    h_load_hit;
+    //sendbuffer_h;
+    uu_profileDataHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(SB_SS, Load, SB_SS) {
+    //yanan
+    h_load_hit;
+    //sendbuffer_h;
+    uu_profileDataHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
+
+
+  //yanan
+  transition({M, SB_MM}, Load_S, SB_MM) {
+    //yanan
+    //h_load_hit;
+    sendbuffer_h;
+    uu_profileDataHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+ transition(M, Load, M) {
+   //yanan
+   h_load_hit;
+   //sendbuffer_h;
+   uu_profileDataHit;
+   po_observeHit;
+   k_popMandatoryQueue;
+  }
+
+ transition(SB_MM, Load, SB_MM) {
+   //yanan
+   h_load_hit;
+   //sendbuffer_h;
+   uu_profileDataHit;
+   po_observeHit;
+   k_popMandatoryQueue;
+  }
+
+  //yanan
+  transition({E, SB_EE}, Load_S, SB_EE) { 
     //yanan
     //h_load_hit;
     sendbuffer_h;
@@ -1424,55 +1562,108 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     k_popMandatoryQueue;
   }
 
-  //yanan
-  transition({M, SB_MM}, Load, SB_MM) {
+  transition(E, Load, E) { 
     //yanan
-    //h_load_hit;
-    sendbuffer_h;
+    h_load_hit;
+    //sendbuffer_h;
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
   }
 
-  //yanan
-  transition({E, SB_EE}, Load, SB_EE) { 
+  transition(SB_EE, Load, SB_EE) { 
     //yanan
-    //h_load_hit;
-    sendbuffer_h;
+    h_load_hit;
+    //sendbuffer_h;
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
   }
 
+
+
   //yanan
-  transition({S, SB_SS}, Ifetch, SB_SS) {
+  transition({S, SB_SS}, Ifetch_S, SB_SS) {
     //yanan
      //h_ifetch_hit;
     sendbuffer_h;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+  transition(S, Ifetch, S) {
+    //yanan
+     h_ifetch_hit;
+    //sendbuffer_h;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(SB_SS, Ifetch, SB_SS) {
+    //yanan
+     h_ifetch_hit;
+    //sendbuffer_h;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
+
+  //yanan
+  transition({E, SB_EE}, Ifetch_S, SB_EE) {
+    //yanan
+     //h_ifetch_hit;
+    sendbuffer_h;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+  transition(E, Ifetch, E) {
+    //yanan
+     h_ifetch_hit;
+    //sendbuffer_h;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(SB_EE, Ifetch, SB_EE) {
+    //yanan
+     h_ifetch_hit;
+    //sendbuffer_h;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
   }
 
   //yanan
-  transition({E, SB_EE}, Ifetch, SB_EE) {
+  transition({M, SB_MM}, Ifetch_S, SB_MM) {
     //yanan
      //h_ifetch_hit;
     sendbuffer_h;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+  transition(M, Ifetch, M) {
+    //yanan
+    h_ifetch_hit;
+    //sendbuffer_h;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
   }
 
-  //yanan
-  transition({M, SB_MM}, Ifetch, SB_MM) {
+  transition(SB_MM, Ifetch, SB_MM) {
     //yanan
-     //h_ifetch_hit;
-    sendbuffer_h;
+    h_ifetch_hit;
+    //sendbuffer_h;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
   }
+
 
   transition(S, Store, SM) {
     i_allocateTBE;
@@ -1527,12 +1718,10 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     d2_sendDataToL2;
     l_popRequestQueue;
   }
-
-  //yanan for stall
-  transition({SB, SB_S, SB_SS, SB_EE, SB_MM}, {Fwd_GETS, Fwd_GET_INSTR, Fwd_GETX})
-    {
-
-    }
+  
+  //yanan
+  transition({SB, SB_S, SB_SS, SB_EE, SB_MM}, {Fwd_GETX, Fwd_GETS, Fwd_GET_INSTR})
+    {testprint_fwd;}
 
   // Transitions from Modified
 
@@ -1689,7 +1878,6 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     o_popIncomingResponseQueue;
     kd_wakeUpDependents;
    }
-
 
   transition(PF_IS, DataS_fromL1, S) {
     u_writeDataToL1Cache;

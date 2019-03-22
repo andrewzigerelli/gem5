@@ -45,6 +45,7 @@ if env['PROTOCOL'] == 'None':
     Return()
 DebugFlag('alphaflag')
 DebugFlag('bufferflag')
+DebugFlag('numflag')
 DebugFlag('testflag')
 DebugFlag('ProtocolTrace')
 DebugFlag('RubyCache')
