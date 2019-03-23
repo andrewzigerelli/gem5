@@ -1,0 +1,11 @@
+make sure gfortran is installed
+runcpu --config=myconf.cfg --action=build all
+runcpu --config=myconf.cfg --action=runsetup --size ref --threads=1 intspeed fpspeed 
+
+# try this first
+runcpu --config=myconf.cfg --action=runsetup --size ref --threads 1 --define
+build_ncpus=16 --verbose 50 intspeed fspeed
+
+
+HIGHLY RECOMMEND:
+mount the image and compile in a chroot environment
