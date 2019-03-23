@@ -46,7 +46,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=100000000
+MAXINSTS=10000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -161,10 +161,10 @@ READFILE_NUMBER=0
 BENCH_READFILE="$(pwd)/readfiles/$BENCHMARK"
 BENCH_OPTIONS="--checkpoint-dir=$CKPT_DIR --script $BENCH_READFILE --kernel
 $KERNEL --disk-image $DISK_IMAGE --cpu-type=$CPU_TYPE
---restore-with-cpu=$CKPT_CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS -r 1"
+--restore-with-cpu=$CKPT_CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS $RCT_CFG -r 1"
 BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
 #BENCH_DEBUG_FLAG=My_Flag
-BENCH_DEBUG_FLAG=stallflag
+BENCH_DEBUG_FLAG=RCTStats
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
