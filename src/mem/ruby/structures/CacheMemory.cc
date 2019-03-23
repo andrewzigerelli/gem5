@@ -159,6 +159,29 @@ CacheMemory::setSetFlag(Addr address, int ID)
     else return 0;
 }
 
+//yanan
+void
+CacheMemory::changeSetFlag(Addr address, bool flag1, bool flag2)
+{
+    int64_t CacheSet = addressToCacheSet(address);
+  //  ID = (int)ID;
+  //  DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
+   if (flag1) flag[CacheSet][0]--;
+   if (flag2) flag[CacheSet][1]--;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+//yanan
 int CacheMemory::NodeToInt(NodeID id)
 {
     return id;

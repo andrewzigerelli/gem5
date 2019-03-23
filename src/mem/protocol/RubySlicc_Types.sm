@@ -212,7 +212,8 @@ structure (CacheMemory, external = "yes") {
   bool checkResourceAvailable(CacheResourceType, Addr);
   //yanan  
   int setSetFlag(Addr, NodeID);
-  void setSetFlag_2(Addr);  
+  void setSetFlag_2(Addr); 
+  void changeSetFlag(Addr, bool, bool); 
   bool checkFlag(Addr);  
   int NodeToInt(NodeID);
 

@@ -112,6 +112,7 @@ class CacheMemory : public SimObject
     //yanan
     int setSetFlag(Addr CacheSet, int ID);
     void setSetFlag_2(Addr address);
+    void changeSetFlag(Addr address, bool flag1, bool flag2);
     bool checkFlag(Addr address);
     int NodeToInt(NodeID id);
     // Functions for locking and unlocking cache lines corresponding to the

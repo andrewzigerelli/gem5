@@ -28,7 +28,7 @@
 
 machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
  : CacheMemory * L0cache;
-   Cycles random_latency := 50;
+   Cycles random_latency := 1;
 
    // Message Queues
    // From this node's L1 cache TO the network
