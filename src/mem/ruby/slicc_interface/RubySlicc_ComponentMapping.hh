@@ -51,12 +51,24 @@ mapAddressToRange(Addr addr, MachineType type, int low_bit,
                   int num_bits, int cluster_id = 0)
 {
     MachineID mach = {type, 0};
+    if (low_bit == 1 && num_bits==1 )
+    {
+        mach. num = cluster_id;
+        return mach;
+    }
     if (num_bits == 0)
         mach.num = cluster_id;
     else
         mach.num = bitSelect(addr, low_bit, low_bit + num_bits - 1)
             + (1 << num_bits) * cluster_id;
     return mach;
+}
+//yanan
+inline MachineID
+getMachineID_y(MachineType type, NodeID id)
+{
+    MachineID mach_y = {type, id};
+    return mach_y;
 }
 
 inline NodeID

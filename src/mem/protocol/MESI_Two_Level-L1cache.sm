@@ -56,8 +56,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
         vnet_type="request";
 
    //yanan delay for L0
-//   MessageBuffer * requestToBuff, network="To", virtual_network="4",
-//        vnet_type="request";
+   MessageBuffer * delayToBuff, network="To", virtual_network="4",
+        vnet_type="request";
 
    // To this node's L1 cache FROM the network
    // a L2 bank -> this L1
@@ -371,7 +371,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   
   //yanan
   out_port(requestToBuff_out, RequestMsg, requestToBuff);
-
+  out_port(delayToBuff_out, RequestMsg, delayToBuff);
 
   // Prefetch queue between the controller and the prefetcher
   // As per Spracklen et al. (HPCA 2005), the prefetch queue should be
@@ -600,8 +600,19 @@ in_msg.addr));
         //Tick currentTime := clockEdge();
         //Cycles ldtime := ticksToCycles(currentTime);
         //yanan latency for L0
-        //enqueue(delayToL0_out, RequestMsg, )
+        enqueue(delayToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := in_msg.LineAddress;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
+MachineType:L0Cache, 1, 1, id1));
 
+        }
+        
 
 
 
@@ -1062,8 +1073,12 @@ in_msg.addr));
        out_msg.Requestor := machineID;
        out_msg.Type := CoherenceRequestType:BUFFREQ;
        out_msg.addr := address;
+       NodeID id := machineIDToNodeID(machineID);
+      // mach.num := id;
+       //out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
+       //                                 0, 0));
        out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
-                                        0, 0));
+1, 1, id));
        out_msg.MessageSize :=MessageSizeType:Control;
        //out_msg.Prefetch := in_msg.Prefetch;
        //out_msg.AccessMode := in_msg.AccessMode;
@@ -1082,8 +1097,12 @@ in_msg.addr));
           out_msg.Requestor := machineID;
           out_msg.Type := CoherenceRequestType:BUFFREQ;
           out_msg.addr := address;
+          //MachineID mach := {MachineType:L0Cache, intToID(0)};
+          NodeID id := machineIDToNodeID(machineID);
+          //out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
+          //                                 0, 0));
           out_msg.Destination.add(mapAddressToRange(address,
-                        MachineType:L0Cache, 0, 0));
+MachineType:L0Cache, 1, 1, id));
           out_msg.MessageSize := MessageSizeType:Control;
        }
        L1Icache.setMRU(address);

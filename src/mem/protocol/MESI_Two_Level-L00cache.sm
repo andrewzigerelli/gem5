@@ -36,7 +36,9 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
    // a local L1 -> this L2 bank, currently ordered with directory forwarded requests
    MessageBuffer * buffresponse, network="To", virtual_network="3",
         vnet_type="response";
-
+   // address and time information
+   MessageBuffer * delayRequest, network="From", virtual_network="4",
+        vnet_type="request";
 
    // To this node's L1 cache FROM the network
    // a L2 bank -> this L1
@@ -205,7 +207,12 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
     }
    }
   }
-
+  in_port(delay_in, RquestMsg, delayRequest, desc = "..."){
+    if(delay_in.isReady(clockEdge())) {
+         //whatever andrew want to do here.
+        delay_in.dequeue(clockEdge());
+    }  
+  }
 
   // ACTIONS
   action(printrequest, "pf", desc="...") {
