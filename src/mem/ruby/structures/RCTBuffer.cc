@@ -20,9 +20,11 @@ RCTBuffer::insert(Addr address, Cycles ret_cycle) {
             address, ret_cycle);
 
     std::unordered_map<Addr, std::set<Cycles>>::iterator loc;
+    int ctrs;
     loc = rct_buffer.find(address);
     if (loc == rct_buffer.end()) { /*new entry*/
         rct_buffer[address] = std::set<Cycles> { ret_cycle };
+        loc = rct_buffer.find(address);
     }
     else {
         loc->second.insert(ret_cycle);
@@ -31,18 +33,18 @@ RCTBuffer::insert(Addr address, Cycles ret_cycle) {
                 DPRINTFR(RCT, "cycle %llu\n", cycle);
             }
         }
-        int ctrs = loc->second.size();
         DPRINTFR(RCT, "number of counters is %d\n", ctrs);
-        /* see if we need to update max stats */
-        if (ctrs > max_num_ctrs_used) {
-            max_num_ctrs_used = ctrs;
-            DPRINTFR(RCTStats, "Max counters %u\n", max_num_ctrs_used);
-        }
     }
     DPRINTFR(RCT, "RCT buffer size is %d\n", rct_buffer.size());
     if ( rct_buffer.size() > max_num_entries_used ) {
         max_num_entries_used = rct_buffer.size();
         DPRINTFR(RCTStats, "Max buffer size: %u\n", max_num_entries_used);
+    }
+    /* see if we need to update max stats */
+    ctrs = loc->second.size();
+    if (ctrs > max_num_ctrs_used) {
+        max_num_ctrs_used = ctrs;
+        DPRINTFR(RCTStats, "Max counters %u\n", max_num_ctrs_used);
     }
 }
 bool
