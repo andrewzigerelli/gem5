@@ -221,6 +221,13 @@ structure (CacheMemory, external = "yes") {
   int getNumBlocks();
   Addr getAddressAtIdx(int);
 
+  //andrew RCT
+  void insertRCTEntry(Addr, Cycles);
+  bool isRCTFull(Addr);
+  void cleanRCTBuffer(Cycles);
+
+
+
   Scalar demand_misses;
   Scalar demand_hits;
 }

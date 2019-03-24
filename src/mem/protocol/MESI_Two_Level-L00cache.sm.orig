@@ -28,7 +28,13 @@
 
 machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
  : CacheMemory * L0cache;
+<<<<<<< HEAD
+   Cycles random_latency := 100;
+||||||| merged common ancestors
+   Cycles random_latency := 50;
+=======
    Cycles random_latency := 1;
+>>>>>>> yananmaster
 
    // Message Queues
    // From this node's L1 cache TO the network
@@ -221,11 +227,22 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   // ACTIONS
   //andrew
   action(printrequest, "pf", desc="...") {
-    DPRINTF(RCT, "addr L0 %d\n", address);
+<<<<<<< HEAD
+    //DPRINTF(RCT, "addr L0 %d\n", address);
+||||||| merged common ancestors
+     DPRINTF(bufferflag, "i love andrew\n");
     Tick a := clockEdge();
     Cycles b := ticksToCycles(a);
     DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
     DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
+=======
+     DPRINTF(bufferflag, "i love andrew\n");
+    DPRINTF(numflag, "andrew\n");
+    Tick a := clockEdge();
+    Cycles b := ticksToCycles(a);
+    DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
+    DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
+>>>>>>> yananmaster
     peek(request_in, RequestMsg) {
        enqueue(responseFromBuff, ResponseMsg, random_latency) {
         out_msg.addr := address;

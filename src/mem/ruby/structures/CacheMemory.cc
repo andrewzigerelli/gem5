@@ -26,10 +26,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "mem/ruby/structures/CacheMemory.hh"
 
 #include "base/intmath.hh"
 #include "base/logging.hh"
+#include "debug/CacheTest.hh" //andrew
+#include "debug/RCT.hh" //andrew
 #include "debug/RubyCache.hh"
 #include "debug/RubyCacheTrace.hh"
 #include "debug/RubyResourceStalls.hh"
@@ -60,7 +63,8 @@ CacheMemory::CacheMemory(const Params *p)
     dataArray(p->dataArrayBanks, p->dataAccessLatency,
               p->start_index_bit, p->ruby_system),
     tagArray(p->tagArrayBanks, p->tagAccessLatency,
-             p->start_index_bit, p->ruby_system)
+             p->start_index_bit, p->ruby_system),
+    rct_buffer(p)
 {
     m_cache_size = p->size;
     m_cache_assoc = p->assoc;
@@ -96,10 +100,6 @@ CacheMemory::init()
     }
     m_cache.resize(m_cache_num_sets,
                     std::vector<AbstractCacheEntry*>(m_cache_assoc, nullptr));
-    //DPRINTF(stallflag, "after resize num sets %d, assoc\n", m_cache_num_sets,
-    //        m_cache_assoc);
-    //DPRINTF(stallflag, "l2 set size %d, assoc %d, set num %d\n",
-    //m_cache_size_2, m_cache_assoc_2, m_cache_num_sets_2);
 }
 
 CacheMemory::~CacheMemory()
@@ -736,4 +736,19 @@ bool
 CacheMemory::isBlockNotBusy(int64_t cache_set, int64_t loc)
 {
   return (m_cache[cache_set][loc]->m_Permission != AccessPermission_Busy);
+}
+//andrew RCT
+void
+CacheMemory::insertRCTEntry(Addr address, Cycles ret_cycle){
+    rct_buffer.insert(address, ret_cycle);
+}
+bool
+CacheMemory::isRCTFull(Addr address) {
+    return rct_buffer.isFull(address);
+
+}
+void
+CacheMemory::cleanRCTBuffer(Cycles cur_cycle) {
+    return rct_buffer.removeOldEntries(cur_cycle);
+
 }
