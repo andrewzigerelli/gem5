@@ -58,6 +58,13 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
    //yanan delay for L0
    MessageBuffer * delayToBuff, network="To", virtual_network="4",
         vnet_type="request";
+   
+   //yanan miss for L0
+   MessageBuffer * missToBuff, network="To", virtual_network="5",
+         vnet_type="request";
+
+
+
 
    // To this node's L1 cache FROM the network
    // a L2 bank -> this L1
@@ -372,6 +379,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   //yanan
   out_port(requestToBuff_out, RequestMsg, requestToBuff);
   out_port(delayToBuff_out, RequestMsg, delayToBuff);
+  out_port(missToBuff_out, RequestMsg, missToBuff);
 
   // Prefetch queue between the controller and the prefetcher
   // As per Spracklen et al. (HPCA 2005), the prefetch queue should be
@@ -600,7 +608,8 @@ in_msg.addr));
         //Tick currentTime := clockEdge();
         //Cycles ldtime := ticksToCycles(currentTime);
         //yanan latency for L0
-        enqueue(delayToBuff_out, RequestMsg, to_l2_latency) {
+       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
+        enqueue(missToBuff_out, RequestMsg, to_l2_latency) {
            out_msg.addr := in_msg.LineAddress;
            out_msg.Type := CoherenceRequestType:BUFFREQ;
            out_msg.Requestor := machineID;
@@ -611,7 +620,7 @@ in_msg.addr));
            out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
 MachineType:L0Cache, 1, 1, id1));
 
-        }
+        }}
         
 
 
@@ -1109,6 +1118,55 @@ MachineType:L0Cache, 1, 1, id));
        L1Dcache.setMRU(address);
     }
   }
+
+
+
+//yanan senddelay for cache miss
+  action(sendmiss, "sd_m", desc="send delay information of the miss") {
+    peek(responseL1Network_in, ResponseMsg) {
+       DPRINTF(bufferflag, "send miss to buffer addr_h %llx\n", address);
+       //DPRINTF(numflag, "%llx\n", address);
+       enqueue(delayToBuff_out, RequestMsg, l1_request_latency) {
+          out_msg.Requestor := machineID;
+          out_msg.Type := CoherenceRequestType:BUFFREQ;
+          out_msg.addr := address;
+          //MachineID mach := {MachineType:L0Cache, intToID(0)};
+          NodeID id := machineIDToNodeID(machineID);
+          //out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
+          //                                 0, 0));
+          out_msg.Destination.add(mapAddressToRange(address,
+                MachineType:L0Cache, 1, 1, id));
+          out_msg.MessageSize := MessageSizeType:Control;
+       }
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1825,6 +1883,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition(IS, Data_all_Acks_M, S) {
     u_writeDataToL1Cache;
+    sendmiss;
     hx_load_hit_M;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
@@ -1850,6 +1909,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition(IS_I, Data_all_Acks_M, I) {
      u_writeDataToL1Cache;
+    sendmiss;
      hx_load_hit_M;
      s_deallocateTBE;
      o_popIncomingResponseQueue;
@@ -1892,6 +1952,7 @@ MachineType:L0Cache, 1, 1, id));
     j_sendUnblock;
     //yanan
     //sendbuffer;
+    sendmiss;
     hx_load_hit_M;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
@@ -1923,6 +1984,7 @@ MachineType:L0Cache, 1, 1, id));
      j_sendUnblock;
      //yanan
      //sendbuffer;
+    sendmiss;
      hx_load_hit_M;
      s_deallocateTBE;
      o_popIncomingResponseQueue;
@@ -1966,6 +2028,7 @@ MachineType:L0Cache, 1, 1, id));
     u_writeDataToL1Cache;
     //yanan
     //sendbuffer;
+    sendmiss;
     hx_load_hit_M;
     jj_sendExclusiveUnblock;
     s_deallocateTBE;
@@ -2040,6 +2103,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition(IS, Data_Exclusive_M, E) {
     u_writeDataToL1Cache;
+    sendmiss;
     hx_load_hit_M;
     jj_sendExclusiveUnblock;
     s_deallocateTBE;

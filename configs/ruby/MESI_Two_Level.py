@@ -152,6 +152,10 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl.stallRequestFromL2.slave = ruby_system.network.master
         l1_cntrl.delayToBuff = MessageBuffer()
         l1_cntrl.delayToBuff.master = ruby_system.network.slave
+        l1_cntrl.missToBuff = MessageBuffer()
+        l1_cntrl.missToBuff.master = ruby_system.network.slave
+
+
 
         l1_cntrl.responseFromL1Cache = MessageBuffer()
         l1_cntrl.responseFromL1Cache.master = ruby_system.network.slave
@@ -190,7 +194,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l0_cntrl.buffresponse.master = ruby_system.network.slave
         l0_cntrl.delayRequest = MessageBuffer()
         l0_cntrl.delayRequest.slave = ruby_system.network.master
-
+        l0_cntrl.missRequest = MessageBuffer()
+        l0_cntrl.missRequest.slave = ruby_system.network.master
 
 
 
@@ -306,6 +311,6 @@ def create_system(options, full_system, system, dma_ports, bootmem,
 
         all_cntrls = all_cntrls + [io_controller]
     ####yanan
-    ruby_system.network.number_of_virtual_networks = 5
+    ruby_system.network.number_of_virtual_networks = 6
     topology = create_topology(all_cntrls, options)
     return (cpu_sequencers, mem_dir_cntrl_nodes, topology)
