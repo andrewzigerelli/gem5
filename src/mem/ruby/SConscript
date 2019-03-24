@@ -43,7 +43,12 @@ Import('*')
 
 if env['PROTOCOL'] == 'None':
     Return()
+# yanan
 DebugFlag('alphaflag')
+#andrew RCT
+DebugFlag('RCTStats')
+DebugFlag('RCT')
+DebugFlag('CacheTest')
 DebugFlag('bufferflag')
 DebugFlag('numflag')
 DebugFlag('testflag')
@@ -135,6 +140,7 @@ MakeInclude('structures/DirectoryMemory.hh')
 MakeInclude('structures/PerfectCacheMemory.hh')
 MakeInclude('structures/PersistentTable.hh')
 MakeInclude('structures/Prefetcher.hh')
+MakeInclude('structures/RCTBuffer.hh') #andrew
 MakeInclude('structures/TBETable.hh')
 MakeInclude('structures/TimerTable.hh')
 MakeInclude('structures/WireBuffer.hh')

@@ -30,6 +30,8 @@
 
 #include "base/intmath.hh"
 #include "base/logging.hh"
+#include "debug/CacheTest.hh" //andrew
+#include "debug/RCT.hh" //andrew
 #include "debug/RubyCache.hh"
 #include "debug/RubyCacheTrace.hh"
 #include "debug/RubyResourceStalls.hh"
@@ -60,7 +62,8 @@ CacheMemory::CacheMemory(const Params *p)
     dataArray(p->dataArrayBanks, p->dataAccessLatency,
               p->start_index_bit, p->ruby_system),
     tagArray(p->tagArrayBanks, p->tagAccessLatency,
-             p->start_index_bit, p->ruby_system)
+             p->start_index_bit, p->ruby_system),
+    rct_buffer(p)
 {
     m_cache_size = p->size;
     m_cache_assoc = p->assoc;
@@ -736,4 +739,19 @@ bool
 CacheMemory::isBlockNotBusy(int64_t cache_set, int64_t loc)
 {
   return (m_cache[cache_set][loc]->m_Permission != AccessPermission_Busy);
+}
+//andrew RCT
+void
+CacheMemory::insertRCTEntry(Addr address, Cycles ret_cycle){
+    rct_buffer.insert(address, ret_cycle);
+}
+bool
+CacheMemory::isRCTFull(Addr address) {
+    return rct_buffer.isFull(address);
+
+}
+void
+CacheMemory::cleanRCTBuffer(Cycles cur_cycle) {
+    return rct_buffer.removeOldEntries(cur_cycle);
+
 }
