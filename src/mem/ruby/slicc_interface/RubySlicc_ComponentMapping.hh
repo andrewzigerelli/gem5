@@ -53,7 +53,12 @@ mapAddressToRange(Addr addr, MachineType type, int low_bit,
     MachineID mach = {type, 0};
     if (low_bit == 1 && num_bits==1 )
     {
-        mach. num = cluster_id;
+        mach.num = cluster_id;
+        return mach;
+    }
+    if (low_bit == 2 && num_bits == 2)
+    {
+        mach.num = cluster_id;
         return mach;
     }
     if (num_bits == 0)

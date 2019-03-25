@@ -44,7 +44,10 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
    // a L2 bank -> this L1
    MessageBuffer * buffrequest, network="From", virtual_network="3",
         vnet_type="request";
-
+   
+   // miss information port
+   MessageBuffer * missRequest, network="From", virtual_network="5",
+       vnet_type="request";
 
 {
   // STATES
@@ -211,11 +214,23 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
     }
    }
   }
-  in_port(delay_in, RquestMsg, delayRequest, desc = "..."){
+  in_port(delay_in, RequestMsg, delayRequest, desc = "..."){
     if(delay_in.isReady(clockEdge())) {
+       peek(delay_in,RequestMsg) {
          //whatever andrew want to do here.
-        delay_in.dequeue(clockEdge());
+       } 
+       delay_in.dequeue(clockEdge());
     }  
+  }
+
+  in_port(miss_in, RequestMsg, missRequest, desc="..."){
+    if(miss_in.isReady(clockEdge())) {
+       peek(miss_in, RequestMsg){
+        // interface for andrew
+        // address is in in_msg.addr;
+       }
+        miss_in.dequeue(clockEdge());
+    }
   }
 
   // ACTIONS

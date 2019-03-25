@@ -98,6 +98,11 @@ CacheMemory::init()
     {
         for (int j=0; j<2; j++) flag[i][j] = 0;
     }
+    for (int i =0; i<10000; i++)
+    {
+        for (int j = 0; j<2; j++) stall2[i][j] = 0;
+    }
+
     m_cache.resize(m_cache_num_sets,
                     std::vector<AbstractCacheEntry*>(m_cache_assoc, nullptr));
 }
@@ -137,6 +142,16 @@ CacheMemory::setSetFlag_2(Addr address)
     DPRINTF(stallflag, "set in l1 %d\n", CacheSet);
 }
 
+
+void
+CacheMemory::resetSetFlag_2(Addr address)
+{
+    int64_t CacheSet = addressToCacheSet_2(address);
+    stall_flag[CacheSet] = 0;
+    DPRINTF(stallflag, "recover set in l1 %d\n", CacheSet);
+}
+
+
 bool CacheMemory::checkFlag(Addr address)
 {
     int64_t CacheSet = addressToCacheSet_2(address);
@@ -154,13 +169,16 @@ CacheMemory::setSetFlag(Addr address, int ID)
   //  ID = (int)ID;
     DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
     if (flag[CacheSet][ID] < (m_cache_assoc))flag[CacheSet][ID] ++;
-    if (flag[CacheSet][ID] == (m_cache_assoc)) return 1 ;
-
+    if (flag[CacheSet][ID] == (m_cache_assoc) && stall2[CacheSet][ID] != 1)
+    {
+        stall2[CacheSet][ID] = 1;
+        return 1 ;
+    }
     else return 0;
 }
 
 //yanan
-void
+bool
 CacheMemory::changeSetFlag(Addr address, bool flag1, bool flag2)
 {
     int64_t CacheSet = addressToCacheSet(address);
@@ -168,10 +186,27 @@ CacheMemory::changeSetFlag(Addr address, bool flag1, bool flag2)
   //  DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
    if (flag1) flag[CacheSet][0]--;
    if (flag2) flag[CacheSet][1]--;
+   if ((flag[CacheSet][0] < 14 && stall2[CacheSet][0] == 1)
+           || (flag[CacheSet][1] < 14 &&
+               stall2[CacheSet][1] == 1))
+   {
+        return true;
+   }
+   else return false;
 
 }
 
-
+bool
+CacheMemory::resetSetFlag(Addr address, int id)
+{
+    int64_t CacheSet = addressToCacheSet(address);
+    if (flag[CacheSet][id] < 14 && stall2[CacheSet][id] == 1)
+    {
+        stall2[CacheSet][id] = 0;
+        return true;
+    }
+    else return false;
+}
 
 
 
@@ -351,7 +386,7 @@ CacheMemory::allocate(Addr address, AbstractCacheEntry *entry, bool touch)
             if (set[i] && (set[i] != entry)) {
                 warn_once("This protocol contains a cache entry handling bug: "
                     "Entries in the cache should never be NotPresent! If\n"
-                    "this entry (%#x) is not tracked elsewhere, it will memory "
+                    "this entry (%#x) is not tracked elsewhere, it will memory"
                     "leak here. Fix your protocol to eliminate these!",
                     address);
             }
