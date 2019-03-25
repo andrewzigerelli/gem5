@@ -69,6 +69,8 @@ structure(RequestMsg, desc="...", interface="Message") {
   int Len;
   bool Dirty, default="false",  desc="Dirty bit";
   PrefetchBit Prefetch,         desc="Is this a prefetch request";
+  //yanan delay flag for L0 
+  bool need_delay, default="false", desc="flag for L0 to decide delay the package or not";
 
   bool functionalRead(Packet *pkt) {
     // Only PUTX messages contains the data block

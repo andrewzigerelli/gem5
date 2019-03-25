@@ -46,7 +46,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=10000000
+MAXINSTS=100000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition

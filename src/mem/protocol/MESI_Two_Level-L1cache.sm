@@ -1095,6 +1095,7 @@ MachineType:L0Cache, 1, 1, id1));
        out_msg.Requestor := machineID;
        out_msg.Type := CoherenceRequestType:BUFFREQ;
        out_msg.addr := address;
+       out_msg.need_delay := true;
        NodeID id := machineIDToNodeID(machineID);
       // mach.num := id;
        //out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
@@ -1104,11 +1105,15 @@ MachineType:L0Cache, 1, 1, id1));
        out_msg.MessageSize :=MessageSizeType:Control;
        //out_msg.Prefetch := in_msg.Prefetch;
        //out_msg.AccessMode := in_msg.AccessMode;
+     
     }
     L1Icache.setMRU(address);
     L1Dcache.setMRU(address);
   }
  }
+
+
+
 
 //yanan sendbuffer action specifically for L1 hit
   action(sendbuffer_h, "sb_h", desc="send test request to buffer") {
@@ -1126,6 +1131,7 @@ MachineType:L0Cache, 1, 1, id1));
           out_msg.Destination.add(mapAddressToRange(address,
 MachineType:L0Cache, 1, 1, id));
           out_msg.MessageSize := MessageSizeType:Control;
+          out_msg.need_delay := true;
        }
        L1Icache.setMRU(address);
        L1Dcache.setMRU(address);
@@ -1133,6 +1139,51 @@ MachineType:L0Cache, 1, 1, id));
   }
 
 
+//yanan sendbuffer action which doesn't need to be delayed(L1 hit)
+  action(sendbuffer_h_n, "sb_h_n", desc="send test request to buffer") {
+    peek(mandatoryQueue_in, RubyRequest) {
+       DPRINTF(bufferflag, "send buffer addr_h_n %llx\n", address);
+       DPRINTF(numflag, "%llx\n", address);
+       enqueue(requestToBuff_out, RequestMsg, l1_request_latency) {
+          out_msg.Requestor := machineID;
+          out_msg.Type := CoherenceRequestType:BUFFREQ;
+          out_msg.addr := address;
+          //MachineID mach := {MachineType:L0Cache, intToID(0)};
+          NodeID id := machineIDToNodeID(machineID);
+          //out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
+          //                                 0, 0));
+          out_msg.Destination.add(mapAddressToRange(address,
+MachineType:L0Cache, 1, 1, id));
+          out_msg.MessageSize := MessageSizeType:Control;
+          out_msg.need_delay := false;
+       }
+    }
+  }
+
+//yanan sendbuffer action which doesn't need to be delayed(L2 hit)
+  action(sendbuffer_n, "sb_n", desc="send test request to buffer") {
+    peek(responseL1Network_in, ResponseMsg) {
+       DPRINTF(bufferflag, "send buffer addr%llx\n", address);
+       enqueue(requestToBuff_out, RequestMsg, l1_request_latency) {
+       DPRINTF(numflag, "%llx\n", address);
+       //DPRINTF(bufferflag, "physicaladdr%llx\n", in_msg.PhysicalAddress);
+       out_msg.Requestor := machineID;
+       out_msg.Type := CoherenceRequestType:BUFFREQ;
+       out_msg.addr := address;
+       out_msg.need_delay := false;
+       NodeID id := machineIDToNodeID(machineID);
+      // mach.num := id;
+       //out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
+       //                                 0, 0));
+       out_msg.Destination.add(mapAddressToRange(address, MachineType:L0Cache,
+1, 1, id));
+       out_msg.MessageSize :=MessageSizeType:Control;
+       //out_msg.Prefetch := in_msg.Prefetch;
+       //out_msg.AccessMode := in_msg.AccessMode;
+     
+    }
+  }
+ }
 
 //yanan senddelay for cache miss
   action(sendmiss, "sd_m", desc="send delay information of the miss") {
@@ -1153,33 +1204,6 @@ MachineType:L0Cache, 1, 1, id));
        }
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1598,7 +1622,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(S, Load, S) {
     //yanan
     h_load_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1607,7 +1631,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(SB_SS, Load, SB_SS) {
     //yanan
     h_load_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1627,7 +1651,7 @@ MachineType:L0Cache, 1, 1, id));
  transition(M, Load, M) {
    //yanan
    h_load_hit;
-   //sendbuffer_h;
+   sendbuffer_h_n;
    uu_profileDataHit;
    po_observeHit;
    k_popMandatoryQueue;
@@ -1636,7 +1660,7 @@ MachineType:L0Cache, 1, 1, id));
  transition(SB_MM, Load, SB_MM) {
    //yanan
    h_load_hit;
-   //sendbuffer_h;
+   sendbuffer_h_n;
    uu_profileDataHit;
    po_observeHit;
    k_popMandatoryQueue;
@@ -1655,7 +1679,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(E, Load, E) { 
     //yanan
     h_load_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1664,7 +1688,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(SB_EE, Load, SB_EE) { 
     //yanan
     h_load_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1684,7 +1708,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(S, Ifetch, S) {
     //yanan
      h_ifetch_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1693,7 +1717,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(SB_SS, Ifetch, SB_SS) {
     //yanan
      h_ifetch_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1712,7 +1736,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(E, Ifetch, E) {
     //yanan
      h_ifetch_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1721,7 +1745,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(SB_EE, Ifetch, SB_EE) {
     //yanan
      h_ifetch_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1739,7 +1763,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(M, Ifetch, M) {
     //yanan
     h_ifetch_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1748,7 +1772,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(SB_MM, Ifetch, SB_MM) {
     //yanan
     h_ifetch_hit;
-    //sendbuffer_h;
+    sendbuffer_h_n;
     uu_profileInstHit;
     po_observeHit;
     k_popMandatoryQueue;
@@ -1886,7 +1910,7 @@ MachineType:L0Cache, 1, 1, id));
     u_writeDataToL1Cache;
     hx_load_hit;
     //yanan
-    //sendbuffer;
+    sendbuffer_n;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
     kd_wakeUpDependents;
@@ -1914,6 +1938,7 @@ MachineType:L0Cache, 1, 1, id));
   transition(IS_I, Data_all_Acks, I) {
     u_writeDataToL1Cache;
     hx_load_hit;
+    sendbuffer_n;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
     kd_wakeUpDependents;
@@ -1953,6 +1978,7 @@ MachineType:L0Cache, 1, 1, id));
     //yanan
     //sendbuffer;
     hx_load_hit;
+    sendbuffer_n;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
     kd_wakeUpDependents;
@@ -1986,6 +2012,7 @@ MachineType:L0Cache, 1, 1, id));
     //yanan
     //sendbuffer;
     hx_load_hit;
+    sendbuffer_n;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
     kd_wakeUpDependents;
@@ -2029,6 +2056,7 @@ MachineType:L0Cache, 1, 1, id));
     //yanan
     //sendbuffer;
     hx_load_hit;
+    sendbuffer_n;
     jj_sendExclusiveUnblock;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
@@ -2076,6 +2104,7 @@ MachineType:L0Cache, 1, 1, id));
     //yanan
     //sendbuffer;
     hx_load_hit;
+    sendbuffer_n;
     jj_sendExclusiveUnblock;
     s_deallocateTBE;
     o_popIncomingResponseQueue;
