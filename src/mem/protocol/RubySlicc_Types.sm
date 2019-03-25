@@ -228,6 +228,9 @@ structure (CacheMemory, external = "yes") {
   void insertRCTEntry(Addr, Cycles);
   bool isRCTFull(Addr);
   void cleanRCTBuffer(Cycles);
+  void recordRequest(Addr, Cycles);
+  void updateHistogram(Addr, Cycles);
+  Cycles sampleHistogram();
 
 
 

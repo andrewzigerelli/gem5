@@ -780,10 +780,20 @@ CacheMemory::insertRCTEntry(Addr address, Cycles ret_cycle){
 bool
 CacheMemory::isRCTFull(Addr address) {
     return rct_buffer.isFull(address);
-
 }
 void
 CacheMemory::cleanRCTBuffer(Cycles cur_cycle) {
-    return rct_buffer.removeOldEntries(cur_cycle);
-
+    rct_buffer.removeOldEntries(cur_cycle);
+}
+void
+CacheMemory::recordRequest(Addr address, Cycles cur_cycle) {
+    rct_buffer.recordRequest(address, cur_cycle);
+}
+void
+CacheMemory::updateHistogram(Addr address, Cycles cur_cycle) {
+    rct_buffer.updateHistogram(address, cur_cycle);
+}
+Cycles
+CacheMemory::sampleHistogram() {
+    return rct_buffer.sampleHistogram();
 }
