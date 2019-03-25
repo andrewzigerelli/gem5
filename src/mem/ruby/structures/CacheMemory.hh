@@ -161,6 +161,9 @@ class CacheMemory : public SimObject
     void insertRCTEntry(Addr address, Cycles ret_cycle);
     bool isRCTFull(Addr address);
     void cleanRCTBuffer(Cycles cur_cycle);
+    void recordRequest(Addr address, Cycles cur_cycle);
+    void updateHistogram(Addr address, Cycles cur_cycle);
+    Cycles sampleHistogram();
 
 
 

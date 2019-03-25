@@ -19,7 +19,7 @@ RCTBuffer::insert(Addr address, Cycles ret_cycle) {
     DPRINTFR(RCT, "inserted 0x%llx to return at %llu\n",
             address, ret_cycle);
 
-    std::unordered_map<Addr, std::set<Cycles>>::iterator loc;
+    RCT_it loc;
     int ctrs;
     loc = rct_buffer.find(address);
     if (loc == rct_buffer.end()) { /*new entry*/
@@ -73,7 +73,7 @@ RCTBuffer::isFull(Addr address) {
 }
 void
 RCTBuffer::removeOldEntries(Cycles cur_cycle) {
-    RCT_It it = rct_buffer.begin();
+    RCT_it it = rct_buffer.begin();
     while (it != rct_buffer.end()) {
         for (Cycles const& cycle: it->second) { /*remove old counters */
             if (cycle <= cur_cycle) {
@@ -83,7 +83,7 @@ RCTBuffer::removeOldEntries(Cycles cur_cycle) {
             }
             /* since set is ordered, we can break the inner for loop early if
              * false. But we don't do that here in case we switch to
-             * unordered_set laster */
+             * unordered_set later */
         }
         /* see if we can free buffer entry */
         if (it->second.size() == 0)  {
@@ -94,5 +94,80 @@ RCTBuffer::removeOldEntries(Cycles cur_cycle) {
             it++;
         }
     }
+}
+void
+RCTBuffer::recordRequest(Addr address, Cycles cur_cycle) {
+    tracker_it loc;
+    loc = tracker.find(address);
+    /* may need different logic */
+    /* if another request for same address comes */
+    if (loc != tracker.end()) {
+        DPRINTFR(RCT || RCTStats, "Request was already recorded!\n");
+        assert(loc == tracker.end());
+    }
+    tracker[address] = cur_cycle;
+}
+void
+RCTBuffer::updateHistogram(Addr address, Cycles cur_cycle) {
+    tracker_it loc = tracker.find(address);
+    assert(loc != tracker.end()); /* if not there, something is wrong*/
+    Cycles latency = cur_cycle - loc->second;
+    if (latency < 1000) { /* larger is rare, ignore it */
+        ++histogram[latency];
+    }
+    /* clear req from record */
+    tracker.erase(loc);
+}
+Cycles
+RCTBuffer::sampleHistogram() {
+    /* create disjoint intervals, sized accoring to freq */
+    std::map<Cycles, std::pair<uint32_t,uint32_t>> intervals;
+    uint32_t max;
+    /* actually calculate ranges and max for uniform_dist*/
+    calcIntervals(max, intervals);
+
+    /* sample from histogram by sampling uniform dist, then finding correct
+     * interval */
+    std::uniform_int_distribution<uint32_t> uniform_dist(1, max);
+    std::random_device rd;
+    std::mt19937 gen(rd()); /* entropy may be low, so use prng seeded with rd*/
+    uint32_t loc = uniform_dist(gen);
+    Cycles entry = findEntry(loc, intervals);
+    return entry;
+
+}
+void
+RCTBuffer::calcIntervals(uint32_t &max,
+        std::map<Cycles, std::pair<uint32_t,uint32_t>> &intervals) {
+    /* create disjoint intervals, sized accoring to freq */
+    uint32_t length, upper_bound;
+    uint32_t lower_bound = 1;
+    hist_it it;
+    for (it = histogram.begin(); it!= histogram.end(); it++) {
+        length = it->second;
+        max += length;
+        upper_bound = lower_bound + length - 1;
+        intervals[it->first] = std::make_pair(lower_bound, upper_bound);
+        /* for next iteration */
+        lower_bound = upper_bound + 1;
+    }
+}
+Cycles
+RCTBuffer::findEntry(uint32_t loc,
+        const std::map<Cycles, std::pair<uint32_t,uint32_t>> &intervals){
+    /* given loc, finds entry in intervals s.t.
+     * pair(1) <= loc <= pair(2) */
+    std::map<Cycles, std::pair<uint32_t,uint32_t>>::const_iterator \
+        it = intervals.begin();
+    std::pair<uint32_t, uint32_t> interval;
+    while (it != intervals.end()) {
+        interval = it->second;
+        if ( loc >= interval.first && loc <= interval.second ) {
+            return it->first;
+        }
+        it++;
+    }
+    assert(it != intervals.end()); //should never get here
+    exit(1); //stop compiler from complaining
 }
 #endif // __MEM_RUBY_STRUCTURES_RCTBUFFER_HH__
