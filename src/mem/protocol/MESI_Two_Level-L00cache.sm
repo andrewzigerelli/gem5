@@ -278,7 +278,8 @@ TBEs[in_msg.addr]);
     }
   }
 
-  action(hit_clear, "hc", desc="clear the record cycle when receives a hit"){
+  action(hit_clear, "hc", desc="clear the record cycle when receives a hit or
+miss"){
     //for andrew
 
   }
