@@ -113,9 +113,11 @@ class CacheMemory : public SimObject
     //yanan
     int setSetFlag(Addr CacheSet, int ID);
     void setSetFlag_2(Addr address);
-    void changeSetFlag(Addr address, bool flag1, bool flag2);
+    bool changeSetFlag(Addr address, bool flag1, bool flag2);
     bool checkFlag(Addr address);
     int NodeToInt(NodeID id);
+    bool resetSetFlag(Addr address, int id);
+    void resetSetFlag_2(Addr address);
     // Functions for locking and unlocking cache lines corresponding to the
     // provided address.  These are required for supporting atomic memory
     // accesses.  These are to be used when only the address of the cache entry
@@ -209,7 +211,7 @@ class CacheMemory : public SimObject
 
     int flag[10000][2];
     int stall_flag[10000];
-
+    int stall2[10000][2];
     //andrew
     //rct structure
     RCTBuffer rct_buffer;

@@ -30,4 +30,6 @@ my_script/output
 my_script/out1
 old.txt
 new.txt
-
+out
+*.swn
+*.swm

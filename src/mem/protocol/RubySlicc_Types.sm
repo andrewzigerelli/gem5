@@ -213,9 +213,12 @@ structure (CacheMemory, external = "yes") {
   //yanan  
   int setSetFlag(Addr, NodeID);
   void setSetFlag_2(Addr); 
-  void changeSetFlag(Addr, bool, bool); 
+  bool changeSetFlag(Addr, bool, bool); 
   bool checkFlag(Addr);  
   int NodeToInt(NodeID);
+  bool resetSetFlag(Addr, int);
+  void resetSetFlag_2(Addr);
+
 
   int getCacheSize();
   int getNumBlocks();

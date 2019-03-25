@@ -63,7 +63,9 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
    MessageBuffer * missToBuff, network="To", virtual_network="5",
          vnet_type="request";
 
-
+   //yanan recover from stalling
+   MessageBuffer * resetRequestFromL2, network="From", virtual_network="5",
+        vnet_type="request";
 
 
    // To this node's L1 cache FROM the network
@@ -411,7 +413,18 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
         stallRequest_in.dequeue(clockEdge());
       }
     }
-    
+    in_port(resetRequest_in, RequestMsg, resetRequestFromL2, desc ="...") {
+      if(resetRequest_in.isReady(clockEdge())) {
+        peek(resetRequest_in, RequestMsg, block_on="addr") {
+            DPRINTF(yyflag, "recover address %llx\n", in_msg.addr);
+            L1Icache.resetSetFlag_2(in_msg.addr);
+            L1Dcache.resetSetFlag_2(in_msg.addr);
+        }
+        resetRequest_in.dequeue(clockEdge());
+      }
+    }  
+
+ 
     in_port(optionalQueue_in, RubyRequest, optionalQueue, desc="...", rank = 3) {
       if (optionalQueue_in.isReady(clockEdge())) {
           peek(optionalQueue_in, RubyRequest) {
