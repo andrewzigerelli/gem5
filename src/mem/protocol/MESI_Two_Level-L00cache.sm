@@ -255,7 +255,7 @@ TBEs[in_msg.addr]);
     Cycles b := ticksToCycles(a);
     DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
     DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
-    peek(request_in, RequestMsg) {
+    peek(delay_in, RequestMsg) {
        enqueue(responseFromBuff, ResponseMsg, random_latency) {
         out_msg.addr := address;
         out_msg.Type := CoherenceResponseType: DATA;
