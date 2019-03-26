@@ -46,6 +46,8 @@ if env['PROTOCOL'] == 'None':
 # yanan
 DebugFlag('alphaflag')
 #andrew RCT
+DebugFlag('RCTPrintHisto')
+DebugFlag('RCTHisto')
 DebugFlag('RCTStats')
 DebugFlag('RCT')
 DebugFlag('CacheTest')

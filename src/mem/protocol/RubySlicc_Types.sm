@@ -229,8 +229,12 @@ structure (CacheMemory, external = "yes") {
   bool isRCTFull(Addr);
   void cleanRCTBuffer(Cycles);
   void recordRequest(Addr, Cycles);
+  void clearRequest(Addr);
+  bool checkRequest(Addr);
   void updateHistogram(Addr, Cycles);
   Cycles sampleHistogram();
+  Cycles getIssueTime(Addr);
+  Cycles validSampleHistogram(Cycles, Cycles);
 
 
 

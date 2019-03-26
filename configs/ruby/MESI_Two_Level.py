@@ -150,8 +150,10 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl.responseFromBuff.slave = ruby_system.network.master
         l1_cntrl.stallRequestFromL2 = MessageBuffer()
         l1_cntrl.stallRequestFromL2.slave = ruby_system.network.master
-        l1_cntrl.delayToBuff = MessageBuffer()
-        l1_cntrl.delayToBuff.master = ruby_system.network.slave
+        l1_cntrl.delayhToBuff = MessageBuffer()
+        l1_cntrl.delayhToBuff.master = ruby_system.network.slave
+        l1_cntrl.delaymToBuff = MessageBuffer()
+        l1_cntrl.delaymToBuff.master = ruby_system.network.slave
         l1_cntrl.missToBuff = MessageBuffer()
         l1_cntrl.missToBuff.master = ruby_system.network.slave
         l1_cntrl.resetRequestFromL2 = MessageBuffer()
@@ -189,8 +191,10 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                                       ruby_system = ruby_system)
         exec("ruby_system.l0_cntrl%d = l0_cntrl" % i)
         l0_cntrl_nodes.append(l0_cntrl)
-        l0_cntrl.buffrequest = MessageBuffer()
-        l0_cntrl.buffrequest.slave = ruby_system.network.master
+        l0_cntrl.buffrequesth = MessageBuffer()
+        l0_cntrl.buffrequesth.slave = ruby_system.network.master
+        l0_cntrl.buffrequestm = MessageBuffer()
+        l0_cntrl.buffrequestm.slave = ruby_system.network.master
         l0_cntrl.buffresponse = MessageBuffer()
         l0_cntrl.buffresponse.master = ruby_system.network.slave
         l0_cntrl.delayRequest = MessageBuffer()
@@ -314,6 +318,6 @@ def create_system(options, full_system, system, dma_ports, bootmem,
 
         all_cntrls = all_cntrls + [io_controller]
     ####yanan
-    ruby_system.network.number_of_virtual_networks = 6
+    ruby_system.network.number_of_virtual_networks = 7
     topology = create_topology(all_cntrls, options)
     return (cpu_sequencers, mem_dir_cntrl_nodes, topology)

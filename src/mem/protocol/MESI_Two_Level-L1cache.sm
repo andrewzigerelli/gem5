@@ -55,12 +55,15 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
    MessageBuffer * requestToBuff, network="To", virtual_network="3", 
         vnet_type="request";
 
-   //yanan delay for L0
-   MessageBuffer * delayToBuff, network="To", virtual_network="4",
+   //yanan delay for L0 hit
+   MessageBuffer * delayhToBuff, network="To", virtual_network="5",
         vnet_type="request";
    
-   //yanan miss for L0
-   MessageBuffer * missToBuff, network="To", virtual_network="5",
+   //yanan delay for L0 miss
+   MessageBuffer * delaymToBuff, network="To", virtual_network="6",
+        vnet_type="request";
+    //yanan miss for L0
+   MessageBuffer * missToBuff, network="To", virtual_network="4",
          vnet_type="request";
 
    //yanan recover from stalling
@@ -380,7 +383,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   
   //yanan
   out_port(requestToBuff_out, RequestMsg, requestToBuff);
-  out_port(delayToBuff_out, RequestMsg, delayToBuff);
+  out_port(delayhToBuff_out, RequestMsg, delayhToBuff);
+  out_port(delaymToBuff_out, RequestMsg, delaymToBuff);
   out_port(missToBuff_out, RequestMsg, missToBuff);
 
   // Prefetch queue between the controller and the prefetcher
@@ -620,25 +624,6 @@ in_msg.addr));
         DPRINTF(bufferflag, "physical addr in manda %llx\n", in_msg.PhysicalAddress);
         //Tick currentTime := clockEdge();
         //Cycles ldtime := ticksToCycles(currentTime);
-        //yanan latency for L0
-       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
-        enqueue(missToBuff_out, RequestMsg, to_l2_latency) {
-           out_msg.addr := in_msg.LineAddress;
-           out_msg.Type := CoherenceRequestType:BUFFREQ;
-           out_msg.Requestor := machineID;
-           out_msg.MessageSize :=MessageSizeType:Control;
-           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
-           NodeID id1 :=machineIDToNodeID(machineID);
-          // mach1.num := id1;
-           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
-MachineType:L0Cache, 1, 1, id1));
-
-        }}
-        
-
-
-
-
 
 
         // Check for data access to blocks in I-cache and ifetchs to blocks in D-cache
@@ -651,6 +636,24 @@ MachineType:L0Cache, 1, 1, id1));
             DPRINTF(bufferflag, "state after mandatory %s\n",
                     L1Icache_entry.CacheState);
             DPRINTF(bufferflag, "1\n");
+
+       //yanan send issue time
+       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
+        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
+        enqueue(delayhToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := in_msg.LineAddress;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
+MachineType:L0Cache, 1, 1, id1));
+
+        }}
+
+
             if(L1Icache.checkFlag(in_msg.LineAddress) && (
                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:E ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_EE ||
@@ -680,6 +683,24 @@ MachineType:L0Cache, 1, 1, id1));
               // L1 does't have the line, but we have space for it
               // in the L1 so let's see if the L2 has it.
               DPRINTF(bufferflag, "3\n");
+
+
+       //yanan send issue time
+       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
+        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
+        enqueue(delaymToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := in_msg.LineAddress;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
+MachineType:L0Cache, 1, 1, id1));
+
+        }}
+
               trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
                       L1Icache_entry, TBEs[in_msg.LineAddress]);
             } else {
@@ -700,6 +721,24 @@ MachineType:L0Cache, 1, 1, id1));
              DPRINTF(bufferflag, "state in manda %s\n",
                     L1Dcache_entry.CacheState);
              DPRINTF(bufferflag, "5\n");
+
+
+       //yanan send issue time
+       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
+        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
+        enqueue(delayhToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := in_msg.LineAddress;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
+MachineType:L0Cache, 1, 1, id1));
+
+        }}
+
             if(L1Dcache.checkFlag(in_msg.LineAddress) && (
                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:E ||
                  getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_EE ||
@@ -731,6 +770,25 @@ MachineType:L0Cache, 1, 1, id1));
               DPRINTF(bufferflag, "7\n");
               DPRINTF(bufferflag, "state in 7 %s\n", getState_S(L1Dcache_entry, in_msg.  
                         LineAddress) );
+
+
+       //yanan send issue time
+       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
+        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
+        enqueue(delaymToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := in_msg.LineAddress;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
+MachineType:L0Cache, 1, 1, id1));
+
+        }}
+
+
               trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
                       L1Dcache_entry, TBEs[in_msg.LineAddress]);
             } else {
@@ -1190,7 +1248,7 @@ MachineType:L0Cache, 1, 1, id));
     peek(responseL1Network_in, ResponseMsg) {
        DPRINTF(bufferflag, "send miss to buffer addr_h %llx\n", address);
        //DPRINTF(numflag, "%llx\n", address);
-       enqueue(delayToBuff_out, RequestMsg, l1_request_latency) {
+       enqueue(missToBuff_out, RequestMsg, l1_request_latency) {
           out_msg.Requestor := machineID;
           out_msg.Type := CoherenceRequestType:BUFFREQ;
           out_msg.addr := address;

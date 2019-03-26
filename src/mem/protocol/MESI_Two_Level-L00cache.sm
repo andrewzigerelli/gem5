@@ -27,8 +27,9 @@
  */
 
 machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
- : CacheMemory * L0cache;
-   Cycles random_latency := 1;
+ : CacheMemory * L0cache; /* RCT stuff */
+   Cycles random_latency := 0;
+   Cycles issue_time := 0;
 
    // Message Queues
    // From this node's L1 cache TO the network
@@ -36,8 +37,11 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
    // a local L1 -> this L2 bank, currently ordered with directory forwarded requests
    MessageBuffer * buffresponse, network="To", virtual_network="3",
         vnet_type="response";
-   // address and time information
-   MessageBuffer * buffrequest, network="From", virtual_network="4",
+   // address and time information hit
+   MessageBuffer * buffrequesth, network="From", virtual_network="5",
+        vnet_type="request";
+   // address and time information miss
+   MessageBuffer * buffrequestm, network="From", virtual_network="6",
         vnet_type="request";
 
    // To this node's L1 cache FROM the network
@@ -46,7 +50,7 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
         vnet_type="request";
    
    // miss information port
-   MessageBuffer * missRequest, network="From", virtual_network="5",
+   MessageBuffer * missRequest, network="From", virtual_network="4",
        vnet_type="request";
 
 {
@@ -63,7 +67,8 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
     // L0 events
     Need_Delay_hit,            desc="Load request from the home processor";
     NoNeed_Delay_hit,  desc="vvv";
-    Record_IssueTime, desc="...";
+    Record_IssueTime_h, desc="...";
+    Record_IssueTime_m, desc="...";
     Add_Histo,        desc="...";
     
   }
@@ -207,9 +212,10 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   in_port(delay_in, RequestMsg, delayRequest, desc="...") {
     if (delay_in.isReady(clockEdge())) {
       peek(delay_in, RequestMsg) {
+        DPRINTF(yyflag, "peeked delay_in: %llx\n", in_msg.addr);
         Entry cache_entry := getCacheEntry(in_msg.addr);
-        if(is_valid(cache_entry)){
-              DPRINTF(RubyCache, "MADE IT HERE WTF\n");
+        if(!L0cache.checkRequest(in_msg.addr)){
+              DPRINTF(yyflag, "stall delay_in addr %llx\n", in_msg.addr);
          } else {
             //for andrew, only delay it when the flag is true
              if(in_msg.need_delay == true){
@@ -218,8 +224,8 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
             } else {
                //for andrew, just clear the entry
                // build a new event here for andrew, 
-               // the action in the event is hit_clear and dequeue the port
-               // i leave hit_clear for you so you can do wahtever you want
+               // the action in the event is clear_record and dequeue the port
+               // i leave clear_record for you so you can do wahtever you want
                // there
                trigger(Event:NoNeed_Delay_hit, in_msg.addr, cache_entry, TBEs[in_msg.addr]);
             }
@@ -227,22 +233,40 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
     }
    }
   }
-  in_port(request_in, RequestMsg, buffrequest, desc = "..."){
-    if(request_in.isReady(clockEdge())) {
-       peek(request_in,RequestMsg) {
+  //L1 hit req issue time
+  in_port(requesth_in, RequestMsg, buffrequesth, desc = "..."){
+    if(requesth_in.isReady(clockEdge())) {
+       peek(requesth_in,RequestMsg) {
+        DPRINTF(yyflag, "addr in request %llx\n", in_msg.addr);
         Entry cache_entry := getCacheEntry(in_msg.addr);
-        trigger(Event:Record_IssueTime, in_msg.addr, cache_entry,
+        trigger(Event:Record_IssueTime_h, in_msg.addr, cache_entry,
+TBEs[in_msg.addr]);
+       } 
+    }  
+  }
+  //L1 miss req issue time
+  in_port(requestm_in, RequestMsg, buffrequestm, desc = "..."){
+    if(requestm_in.isReady(clockEdge())) {
+       peek(requestm_in,RequestMsg) {
+        DPRINTF(yyflag, "addr in request %llx\n", in_msg.addr);
+        Entry cache_entry := getCacheEntry(in_msg.addr);
+        trigger(Event:Record_IssueTime_m, in_msg.addr, cache_entry,
 TBEs[in_msg.addr]);
        } 
     }  
   }
 
+  // miss request
   in_port(miss_in, RequestMsg, missRequest, desc="..."){
     if(miss_in.isReady(clockEdge())) {
        peek(miss_in, RequestMsg){
-        Entry cache_entry := getCacheEntry(in_msg.addr);
-        trigger(Event:Add_Histo, in_msg.addr, cache_entry,
-TBEs[in_msg.addr]);
+        if(!L0cache.checkRequest(in_msg.addr)){
+          DPRINTF(yyflag, "stall miss_in addr %llx\n", in_msg.addr);
+        } else{
+          DPRINTF(yyflag, "addr in miss %llx\n", in_msg.addr);
+          Entry cache_entry := getCacheEntry(in_msg.addr);
+          trigger(Event:Add_Histo, in_msg.addr, cache_entry,
+TBEs[in_msg.addr]);}
        }
     }
   }
@@ -250,12 +274,16 @@ TBEs[in_msg.addr]);
   // ACTIONS
   //andrew
   action(delaySendBack, "dsb", desc="...") {
-    DPRINTF(RCT, "addr L0 %d\n", address);
+    DPRINTF(RCT, "addr L0 %llu\n", address);
     Tick a := clockEdge();
     Cycles b := ticksToCycles(a);
     DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
     DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
     peek(delay_in, RequestMsg) {
+       DPRINTF(yyflag, "addr in hit %llx\n", in_msg.addr);
+       /* get random latency */
+       issue_time := L0cache.getIssueTime(address);
+       random_latency := L0cache.validSampleHistogram(issue_time, curCycle());
        enqueue(responseFromBuff, ResponseMsg, random_latency) {
         out_msg.addr := address;
         out_msg.Type := CoherenceResponseType: DATA;
@@ -268,9 +296,8 @@ TBEs[in_msg.addr]);
        /* remove old entries */
        L0cache.cleanRCTBuffer(curCycle());
        if(!L0cache.isRCTFull(address)) {
-           DPRINTF(RCT, "yes");
            DPRINTF(RCT, "we can insert!\n");
-           L0cache.insertRCTEntry(address, curCycle()+random_latency);
+           L0cache.insertRCTEntry(address, issue_time + random_latency);
        }
        else{
            DPRINTF(RCT, "RCT is full!\n");
@@ -278,27 +305,31 @@ TBEs[in_msg.addr]);
     }
   }
 
-  action(hit_clear, "hc", desc="clear the record cycle when receives a hit or
-miss"){
+  action(clear_record, "hc", desc="clear the record cycle when hit, no delay"){
     //for andrew
-
+    L0cache.clearRequest(address);
   }
   
   action(insert_record, "ir", desc="...") {
     //for andrew to insert issue time
+    L0cache.recordRequest(address, curCycle());
   }
 
 
   action(add_histo, "ah", desc="...") {
     //for andrew to insert miss latency to histogram
+    L0cache.updateHistogram(address, curCycle());
   }
 
   
 
-  action(k_popRequestQueue, "kr", desc="Pop request queue.") {
-    request_in.dequeue(clockEdge());
+  action(k_popRequesthQueue, "krh", desc="Pop request queue.") {
+    requesth_in.dequeue(clockEdge());
   }
   
+  action(k_popRequestmQueue, "krm", desc="Pop request queue.") {
+    requestm_in.dequeue(clockEdge());
+  }
 
   action(k_popdelayQueue, "kd", desc="Pop request queue.") {
     delay_in.dequeue(clockEdge());
@@ -318,29 +349,31 @@ miss"){
 
   transition({NP,I}, Need_Delay_hit) {
     delaySendBack;
-    hit_clear;
+    clear_record;
     k_popdelayQueue;
     
   }
 
   transition({NP, I}, NoNeed_Delay_hit) {
-    hit_clear;
+    clear_record;
     k_popdelayQueue;
   }
-  transition({NP, I}, Record_IssueTime) {
+
+  transition({NP, I}, Record_IssueTime_h) {
     insert_record;
-    k_popRequestQueue;
+    k_popRequesthQueue;
+  }
+
+  transition({NP, I}, Record_IssueTime_m) {
+    insert_record;
+    k_popRequestmQueue;
   }
 
   transition({NP, I}, Add_Histo) {
     add_histo;
-    hit_clear;
+    clear_record;
     k_popmissQueue;
   }
-
-
-
-
 
 
 }

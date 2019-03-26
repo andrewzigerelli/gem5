@@ -5,7 +5,13 @@
 
 #include "base/trace.hh"
 #include "debug/RCT.hh"
+#include "debug/RCTHisto.hh"
+#include "debug/RCTPrintHisto.hh"
 #include "debug/RCTStats.hh"
+
+/*interal helpers*/
+void printHisto(const std::map<Cycles, std::pair<uint32_t,uint32_t>>
+        &intervals);
 
 RCTBuffer::RCTBuffer(const Params *p) :
     SimObject(p),
@@ -14,6 +20,7 @@ RCTBuffer::RCTBuffer(const Params *p) :
         max_num_ctrs_used = 0;
         max_num_entries_used = 0;
     }
+
 void
 RCTBuffer::insert(Addr address, Cycles ret_cycle) {
     DPRINTFR(RCT, "inserted 0x%llx to return at %llu\n",
@@ -97,34 +104,55 @@ RCTBuffer::removeOldEntries(Cycles cur_cycle) {
 }
 void
 RCTBuffer::recordRequest(Addr address, Cycles cur_cycle) {
+    DPRINTF(RCTHisto, "record 0x%llx\n", address);
     tracker_it loc;
     loc = tracker.find(address);
-    /* may need different logic */
-    /* if another request for same address comes */
     if (loc != tracker.end()) {
-        DPRINTFR(RCT || RCTStats, "Request was already recorded!\n");
-        assert(loc == tracker.end());
+        loc->second.push(cur_cycle);
     }
-    tracker[address] = cur_cycle;
+    else {
+        tracker[address].push(cur_cycle);
+    }
 }
 void
+RCTBuffer::clearRequest(Addr address) {
+    DPRINTF(RCTHisto, "clear 0x%llx\n", address);
+    tracker_it loc;
+    loc = tracker.find(address);
+    assert(loc != tracker.end());
+    loc->second.pop();
+    if (loc->second.size() == 0) {
+        tracker.erase(loc);
+    }
+}
+//yanan
+bool
+RCTBuffer::checkRequest(Addr address) {
+    //DPRINTF(RCTHisto, "clear 0x%llx\n", address);
+    tracker_it loc;
+    loc = tracker.find(address);
+    return(loc != tracker.end());
+}
+
+void
 RCTBuffer::updateHistogram(Addr address, Cycles cur_cycle) {
-    tracker_it loc = tracker.find(address);
-    assert(loc != tracker.end()); /* if not there, something is wrong*/
-    Cycles latency = cur_cycle - loc->second;
+    /* add point to histogram, delete req from record */
+    Cycles issue_time = getIssueTime(address);
+    Cycles latency = cur_cycle - issue_time;
+    DPRINTFR(RCTHisto, "address 0x%llx with length %llu\n", address, latency);
     if (latency < 1000) { /* larger is rare, ignore it */
+    DPRINTFR(RCTHisto, "inserted 0x%llx with length %llu\n", address, latency);
         ++histogram[latency];
     }
-    /* clear req from record */
-    tracker.erase(loc);
 }
 Cycles
 RCTBuffer::sampleHistogram() {
     /* create disjoint intervals, sized accoring to freq */
     std::map<Cycles, std::pair<uint32_t,uint32_t>> intervals;
-    uint32_t max;
+    uint32_t max = 0;
     /* actually calculate ranges and max for uniform_dist*/
     calcIntervals(max, intervals);
+    DPRINTF(RCTPrintHisto, "max = %llu\n", max);
 
     /* sample from histogram by sampling uniform dist, then finding correct
      * interval */
@@ -132,6 +160,10 @@ RCTBuffer::sampleHistogram() {
     std::random_device rd;
     std::mt19937 gen(rd()); /* entropy may be low, so use prng seeded with rd*/
     uint32_t loc = uniform_dist(gen);
+    DPRINTF(RCTPrintHisto, "loc = %llu\n", loc);
+    if (DTRACE(RCTPrintHisto)) {
+        printHisto(intervals);
+    }
     Cycles entry = findEntry(loc, intervals);
     return entry;
 
@@ -169,5 +201,37 @@ RCTBuffer::findEntry(uint32_t loc,
     }
     assert(it != intervals.end()); //should never get here
     exit(1); //stop compiler from complaining
+}
+Cycles
+RCTBuffer::getIssueTime(Addr address) {
+    tracker_it it;
+    it = tracker.find(address);
+    assert(it != tracker.end());
+    Cycles issue_time = it->second.front();
+    return issue_time;
+}
+Cycles
+RCTBuffer::validSampleHistogram(Cycles issue_time, Cycles cur_cycle) {
+    Cycles random_latency;
+    Cycles return_time;
+    DPRINTF(RCT, " sample issue_time %d\n", issue_time);
+    DPRINTF(RCT, "sample cur_cycle %d\n", cur_cycle);
+    do {
+        random_latency = sampleHistogram();
+        return_time = issue_time + random_latency;
+    } while ( return_time <= cur_cycle );
+    return random_latency;
+}
+void printHisto(const std::map<Cycles, std::pair<uint32_t,uint32_t>>
+        &intervals) {
+    std::pair<uint32_t, uint32_t> interval;
+    std::map<Cycles, std::pair<uint32_t,uint32_t>>::const_iterator \
+        it = intervals.begin();
+    while (it != intervals.end()) {
+        interval = it->second;
+        DPRINTFR(RCTPrintHisto, "[%4llu, %4llu]\n",
+            interval.first, interval.second);
+        it++;
+    }
 }
 #endif // __MEM_RUBY_STRUCTURES_RCTBUFFER_HH__

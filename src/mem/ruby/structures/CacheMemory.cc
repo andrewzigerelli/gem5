@@ -186,13 +186,15 @@ CacheMemory::changeSetFlag(Addr address, bool flag1, bool flag2)
   //  DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
    if (flag1) flag[CacheSet][0]--;
    if (flag2) flag[CacheSet][1]--;
+
    if ((flag[CacheSet][0] < 14 && stall2[CacheSet][0] == 1)
            || (flag[CacheSet][1] < 14 &&
                stall2[CacheSet][1] == 1))
    {
         return true;
    }
-   else return false;
+
+   return false;
 
 }
 
@@ -790,10 +792,28 @@ CacheMemory::recordRequest(Addr address, Cycles cur_cycle) {
     rct_buffer.recordRequest(address, cur_cycle);
 }
 void
+CacheMemory::clearRequest(Addr address) {
+    rct_buffer.clearRequest(address);
+}
+
+bool
+CacheMemory::checkRequest(Addr address) {
+    return(rct_buffer.checkRequest(address));
+}
+
+void
 CacheMemory::updateHistogram(Addr address, Cycles cur_cycle) {
     rct_buffer.updateHistogram(address, cur_cycle);
 }
 Cycles
 CacheMemory::sampleHistogram() {
     return rct_buffer.sampleHistogram();
+}
+Cycles
+CacheMemory::getIssueTime(Addr address) {
+    return rct_buffer.getIssueTime(address);
+}
+Cycles
+CacheMemory::validSampleHistogram(Cycles issue_time, Cycles cur_cycle) {
+    return rct_buffer.validSampleHistogram(issue_time, cur_cycle);
 }

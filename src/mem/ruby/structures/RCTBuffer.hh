@@ -1,3 +1,4 @@
+#include <queue>
 #include <random>
 #include <unordered_map>
 
@@ -9,7 +10,7 @@ class RCTBuffer : public SimObject
   public:
     typedef RubyCacheParams Params;
     typedef std::map <Cycles, uint32_t>::iterator hist_it;
-    typedef std::unordered_map<Addr, Cycles>::iterator tracker_it;
+    typedef std::unordered_map<Addr, std::queue<Cycles>>::iterator tracker_it;
     typedef std::unordered_map<Addr,std::set<Cycles>>::iterator RCT_it;
     RCTBuffer(const Params *p);
     //public methods
@@ -17,8 +18,14 @@ class RCTBuffer : public SimObject
     bool isFull(Addr address);
     void removeOldEntries(Cycles cur_cycle);
     void recordRequest(Addr address, Cycles cur_cycle);
+    void clearRequest(Addr address);
+    //yanan
+    bool checkRequest(Addr address);
     void updateHistogram(Addr address, Cycles cur_cycle);
     Cycles sampleHistogram();
+    Cycles getIssueTime(Addr address);
+    /* needed since SLICC doesn't support loops (nor < operator) */
+    Cycles validSampleHistogram(Cycles issue_time, Cycles cur_cycle);
   private:
     const uint16_t max_map_size;
     const uint16_t max_set_size;
@@ -31,7 +38,7 @@ class RCTBuffer : public SimObject
     // need to track incoming requests because
     // ruby doesn't keep track of length of request
     // only sequencer knows
-    std::unordered_map<Addr, Cycles> tracker;
+    std::unordered_map<Addr, std::queue<Cycles>> tracker;
     /* internal helpers */
     void calcIntervals(uint32_t &max,
             std::map<Cycles,

@@ -164,8 +164,13 @@ class CacheMemory : public SimObject
     bool isRCTFull(Addr address);
     void cleanRCTBuffer(Cycles cur_cycle);
     void recordRequest(Addr address, Cycles cur_cycle);
+    void clearRequest(Addr address);
+    //yanan
+    bool checkRequest(Addr address);
     void updateHistogram(Addr address, Cycles cur_cycle);
     Cycles sampleHistogram();
+    Cycles getIssueTime(Addr address);
+    Cycles validSampleHistogram(Cycles issue_time, Cycles cur_cycle);
 
 
 
