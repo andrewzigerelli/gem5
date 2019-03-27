@@ -194,6 +194,7 @@ CacheMemory::changeSetFlag(Addr address, bool flag1, bool flag2)
         return true;
    }
 
+
    return false;
 
 }

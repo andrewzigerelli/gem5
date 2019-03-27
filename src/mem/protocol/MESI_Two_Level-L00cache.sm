@@ -212,6 +212,7 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   in_port(delay_in, RequestMsg, delayRequest, desc="...") {
     if (delay_in.isReady(clockEdge())) {
       peek(delay_in, RequestMsg) {
+        DPRINTF(RCTTrace, "delay_in: %llx\n", in_msg.addr);
         DPRINTF(yyflag, "peeked delay_in: %llx\n", in_msg.addr);
         Entry cache_entry := getCacheEntry(in_msg.addr);
         if(!L0cache.checkRequest(in_msg.addr)){
@@ -237,6 +238,7 @@ machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
   in_port(requesth_in, RequestMsg, buffrequesth, desc = "..."){
     if(requesth_in.isReady(clockEdge())) {
        peek(requesth_in,RequestMsg) {
+        DPRINTF(RCTTrace, "requesth_in: %llx, %d\n", in_msg.addr, curCycle());
         DPRINTF(yyflag, "addr in request %llx\n", in_msg.addr);
         Entry cache_entry := getCacheEntry(in_msg.addr);
         trigger(Event:Record_IssueTime_h, in_msg.addr, cache_entry,
@@ -248,6 +250,7 @@ TBEs[in_msg.addr]);
   in_port(requestm_in, RequestMsg, buffrequestm, desc = "..."){
     if(requestm_in.isReady(clockEdge())) {
        peek(requestm_in,RequestMsg) {
+        DPRINTF(RCTTrace, "requestm_in: %llx, %d\n", in_msg.addr, curCycle());
         DPRINTF(yyflag, "addr in request %llx\n", in_msg.addr);
         Entry cache_entry := getCacheEntry(in_msg.addr);
         trigger(Event:Record_IssueTime_m, in_msg.addr, cache_entry,
@@ -260,6 +263,7 @@ TBEs[in_msg.addr]);
   in_port(miss_in, RequestMsg, missRequest, desc="..."){
     if(miss_in.isReady(clockEdge())) {
        peek(miss_in, RequestMsg){
+        DPRINTF(RCTTrace, "miss_in: %llx\n", in_msg.addr);
         if(!L0cache.checkRequest(in_msg.addr)){
           DPRINTF(yyflag, "stall miss_in addr %llx\n", in_msg.addr);
         } else{
@@ -300,7 +304,7 @@ TBEs[in_msg.addr]);}
            L0cache.insertRCTEntry(address, issue_time + random_latency);
        }
        else{
-           DPRINTF(RCT, "RCT is full!\n");
+           DPRINTF(RCTTrace, "RCT is full!\n");
        }
     }
   }

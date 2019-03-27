@@ -637,23 +637,6 @@ in_msg.addr));
                     L1Icache_entry.CacheState);
             DPRINTF(bufferflag, "1\n");
 
-       //yanan send issue time
-       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
-        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
-        enqueue(delayhToBuff_out, RequestMsg, to_l2_latency) {
-           out_msg.addr := in_msg.LineAddress;
-           out_msg.Type := CoherenceRequestType:BUFFREQ;
-           out_msg.Requestor := machineID;
-           out_msg.MessageSize :=MessageSizeType:Control;
-           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
-           NodeID id1 :=machineIDToNodeID(machineID);
-          // mach1.num := id1;
-           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
-MachineType:L0Cache, 1, 1, id1));
-
-        }}
-
-
             if(L1Icache.checkFlag(in_msg.LineAddress) && (
                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:E ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_EE ||
@@ -684,23 +667,6 @@ MachineType:L0Cache, 1, 1, id1));
               // in the L1 so let's see if the L2 has it.
               DPRINTF(bufferflag, "3\n");
 
-
-       //yanan send issue time
-       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
-        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
-        enqueue(delaymToBuff_out, RequestMsg, to_l2_latency) {
-           out_msg.addr := in_msg.LineAddress;
-           out_msg.Type := CoherenceRequestType:BUFFREQ;
-           out_msg.Requestor := machineID;
-           out_msg.MessageSize :=MessageSizeType:Control;
-           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
-           NodeID id1 :=machineIDToNodeID(machineID);
-          // mach1.num := id1;
-           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
-MachineType:L0Cache, 1, 1, id1));
-
-        }}
-
               trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
                       L1Icache_entry, TBEs[in_msg.LineAddress]);
             } else {
@@ -721,23 +687,6 @@ MachineType:L0Cache, 1, 1, id1));
              DPRINTF(bufferflag, "state in manda %s\n",
                     L1Dcache_entry.CacheState);
              DPRINTF(bufferflag, "5\n");
-
-
-       //yanan send issue time
-       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
-        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
-        enqueue(delayhToBuff_out, RequestMsg, to_l2_latency) {
-           out_msg.addr := in_msg.LineAddress;
-           out_msg.Type := CoherenceRequestType:BUFFREQ;
-           out_msg.Requestor := machineID;
-           out_msg.MessageSize :=MessageSizeType:Control;
-           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
-           NodeID id1 :=machineIDToNodeID(machineID);
-          // mach1.num := id1;
-           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
-MachineType:L0Cache, 1, 1, id1));
-
-        }}
 
             if(L1Dcache.checkFlag(in_msg.LineAddress) && (
                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:E ||
@@ -770,24 +719,6 @@ MachineType:L0Cache, 1, 1, id1));
               DPRINTF(bufferflag, "7\n");
               DPRINTF(bufferflag, "state in 7 %s\n", getState_S(L1Dcache_entry, in_msg.  
                         LineAddress) );
-
-
-       //yanan send issue time
-       if(in_msg.Type==RubyRequestType:IFETCH || in_msg.Type==RubyRequestType:LD){
-        DPRINTF(bufferflag, "send issue time addr %llx\n", in_msg.LineAddress);
-        enqueue(delaymToBuff_out, RequestMsg, to_l2_latency) {
-           out_msg.addr := in_msg.LineAddress;
-           out_msg.Type := CoherenceRequestType:BUFFREQ;
-           out_msg.Requestor := machineID;
-           out_msg.MessageSize :=MessageSizeType:Control;
-           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
-           NodeID id1 :=machineIDToNodeID(machineID);
-          // mach1.num := id1;
-           out_msg.Destination.add(mapAddressToRange(in_msg.LineAddress,
-MachineType:L0Cache, 1, 1, id1));
-
-        }}
-
 
               trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
                       L1Dcache_entry, TBEs[in_msg.LineAddress]);
@@ -1143,6 +1074,39 @@ MachineType:L0Cache, 1, 1, id1));
          desc="Invalidate store conditional as the cache lost permissions") {
     sequencer.invalidateSC(address);
   }
+  //yanan send issue time l1 hit
+  action(sendrequesth, "srh", desc="..."){
+        enqueue(delayhToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := address;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(address,
+MachineType:L0Cache, 1, 1, id1));
+        }
+  }
+
+
+  //yanan send issue time l1 miss
+  action(sendrequestm, "srm", desc="..."){
+        enqueue(delaymToBuff_out, RequestMsg, to_l2_latency) {
+           out_msg.addr := address;
+           out_msg.Type := CoherenceRequestType:BUFFREQ;
+           out_msg.Requestor := machineID;
+           out_msg.MessageSize :=MessageSizeType:Control;
+           //MachineID mach1 := {MachineType:L0Cache, intToID(0)};
+           NodeID id1 :=machineIDToNodeID(machineID);
+          // mach1.num := id1;
+           out_msg.Destination.add(mapAddressToRange(address,
+MachineType:L0Cache, 1, 1, id1));
+        }
+  }
+
+
+
 //yanan sendbuffer action specifically for L2 hit
   action(sendbuffer, "sb", desc="send test request to buffer") {
     peek(responseL1Network_in, ResponseMsg) {
@@ -1578,6 +1542,8 @@ MachineType:L0Cache, 1, 1, id));
 
   transition({NP,I}, Load, IS) {
     oo_allocateL1DCacheBlock;
+    //yanan
+    sendrequestm;
     PRINTFTEST;
     i_allocateTBE;
     a_issueGETS;
@@ -1612,6 +1578,8 @@ MachineType:L0Cache, 1, 1, id));
   }
 
   transition({NP,I}, Ifetch, IS) {
+    //yanan
+    sendrequestm;
     pp_allocateL1ICacheBlock;
     i_allocateTBE;
     ai_issueGETINSTR;
@@ -1672,6 +1640,7 @@ MachineType:L0Cache, 1, 1, id));
   transition({S, SB_SS}, Load_S, SB_SS) {
     //yanan
     //h_load_hit;
+    sendrequesth;
     sendbuffer_h;
     uu_profileDataHit;
     po_observeHit;
@@ -1679,6 +1648,7 @@ MachineType:L0Cache, 1, 1, id));
   }
   transition(S, Load, S) {
     //yanan
+    sendrequesth;
     h_load_hit;
     sendbuffer_h_n;
     uu_profileDataHit;
@@ -1688,6 +1658,7 @@ MachineType:L0Cache, 1, 1, id));
 
   transition(SB_SS, Load, SB_SS) {
     //yanan
+    sendrequesth;
     h_load_hit;
     sendbuffer_h_n;
     uu_profileDataHit;
@@ -1700,6 +1671,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition({M, SB_MM}, Load_S, SB_MM) {
     //yanan
+    sendrequesth;
     //h_load_hit;
     sendbuffer_h;
     uu_profileDataHit;
@@ -1708,6 +1680,7 @@ MachineType:L0Cache, 1, 1, id));
   }
  transition(M, Load, M) {
    //yanan
+   sendrequesth;
    h_load_hit;
    sendbuffer_h_n;
    uu_profileDataHit;
@@ -1717,6 +1690,7 @@ MachineType:L0Cache, 1, 1, id));
 
  transition(SB_MM, Load, SB_MM) {
    //yanan
+   sendrequesth;
    h_load_hit;
    sendbuffer_h_n;
    uu_profileDataHit;
@@ -1727,6 +1701,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition({E, SB_EE}, Load_S, SB_EE) { 
     //yanan
+    sendrequesth;
     //h_load_hit;
     sendbuffer_h;
     uu_profileDataHit;
@@ -1736,6 +1711,7 @@ MachineType:L0Cache, 1, 1, id));
 
   transition(E, Load, E) { 
     //yanan
+    sendrequesth;
     h_load_hit;
     sendbuffer_h_n;
     uu_profileDataHit;
@@ -1745,6 +1721,7 @@ MachineType:L0Cache, 1, 1, id));
 
   transition(SB_EE, Load, SB_EE) { 
     //yanan
+    sendrequesth;
     h_load_hit;
     sendbuffer_h_n;
     uu_profileDataHit;
@@ -1757,6 +1734,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition({S, SB_SS}, Ifetch_S, SB_SS) {
     //yanan
+    sendrequesth;
      //h_ifetch_hit;
     sendbuffer_h;
     uu_profileInstHit;
@@ -1765,6 +1743,7 @@ MachineType:L0Cache, 1, 1, id));
   }
   transition(S, Ifetch, S) {
     //yanan
+    sendrequesth;
      h_ifetch_hit;
     sendbuffer_h_n;
     uu_profileInstHit;
@@ -1774,6 +1753,7 @@ MachineType:L0Cache, 1, 1, id));
 
   transition(SB_SS, Ifetch, SB_SS) {
     //yanan
+    sendrequesth;
      h_ifetch_hit;
     sendbuffer_h_n;
     uu_profileInstHit;
@@ -1785,6 +1765,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition({E, SB_EE}, Ifetch_S, SB_EE) {
     //yanan
+    sendrequesth;
      //h_ifetch_hit;
     sendbuffer_h;
     uu_profileInstHit;
@@ -1793,6 +1774,7 @@ MachineType:L0Cache, 1, 1, id));
   }
   transition(E, Ifetch, E) {
     //yanan
+    sendrequesth;
      h_ifetch_hit;
     sendbuffer_h_n;
     uu_profileInstHit;
@@ -1802,6 +1784,7 @@ MachineType:L0Cache, 1, 1, id));
 
   transition(SB_EE, Ifetch, SB_EE) {
     //yanan
+    sendrequesth;
      h_ifetch_hit;
     sendbuffer_h_n;
     uu_profileInstHit;
@@ -1812,6 +1795,7 @@ MachineType:L0Cache, 1, 1, id));
   //yanan
   transition({M, SB_MM}, Ifetch_S, SB_MM) {
     //yanan
+    sendrequesth;
      //h_ifetch_hit;
     sendbuffer_h;
     uu_profileInstHit;
@@ -1820,6 +1804,7 @@ MachineType:L0Cache, 1, 1, id));
   }
   transition(M, Ifetch, M) {
     //yanan
+    sendrequesth;
     h_ifetch_hit;
     sendbuffer_h_n;
     uu_profileInstHit;
@@ -1829,6 +1814,7 @@ MachineType:L0Cache, 1, 1, id));
 
   transition(SB_MM, Ifetch, SB_MM) {
     //yanan
+    sendrequesth;
     h_ifetch_hit;
     sendbuffer_h_n;
     uu_profileInstHit;
