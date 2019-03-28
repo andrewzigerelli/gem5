@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/657.xz_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/xz_s_base.myconf-m64 cpu2006docs.tar.xz 6643 055ce243071129412e9dd0b3b69a21654033a9b723d874b2015c774fac1553d9713be561ca86f74e4f16f22e664fc17a79f30caa5ad2c04fbc447549c2810fae 1036078272 1111795472 4 > cpu2006docs.tar-6643-4.out 2>> cpu2006docs.tar-6643-4.err;m5 exit;

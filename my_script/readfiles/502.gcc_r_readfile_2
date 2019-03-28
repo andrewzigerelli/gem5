@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/502.gcc_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/cpugcc_r_base.myconf-m64 gcc-smaller.c -O3 -fipa-pta -o gcc-smaller.opts-O3_-fipa-pta.s > gcc-smaller.opts-O3_-fipa-pta.out 2>> gcc-smaller.opts-O3_-fipa-pta.err;m5 exit;
