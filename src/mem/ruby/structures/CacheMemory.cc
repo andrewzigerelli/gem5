@@ -168,8 +168,8 @@ CacheMemory::setSetFlag(Addr address, int ID)
     int64_t CacheSet = addressToCacheSet(address);
   //  ID = (int)ID;
     DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
-    if (flag[CacheSet][ID] < (m_cache_assoc))flag[CacheSet][ID] ++;
-    if (flag[CacheSet][ID] == (m_cache_assoc) && stall2[CacheSet][ID] != 1)
+    if (flag[CacheSet][ID] < (m_cache_assoc-13))flag[CacheSet][ID] ++;
+    if (flag[CacheSet][ID] == (m_cache_assoc-13) && stall2[CacheSet][ID] != 1)
     {
         stall2[CacheSet][ID] = 1;
         return 1 ;
@@ -186,14 +186,14 @@ CacheMemory::changeSetFlag(Addr address, bool flag1, bool flag2)
   //  DPRINTF(stallflag, "set flag set %d, id %d\n", CacheSet, ID);
    if (flag1) flag[CacheSet][0]--;
    if (flag2) flag[CacheSet][1]--;
-
+/*
    if ((flag[CacheSet][0] < 14 && stall2[CacheSet][0] == 1)
            || (flag[CacheSet][1] < 14 &&
                stall2[CacheSet][1] == 1))
    {
         return true;
    }
-
+*/
 
    return false;
 

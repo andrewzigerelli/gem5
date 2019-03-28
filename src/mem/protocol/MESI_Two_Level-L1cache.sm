@@ -1637,7 +1637,7 @@ MachineType:L0Cache, 1, 1, id));
   }
   //yanan
   // Transitions from Shared
-  transition({S, SB_SS}, Load_S, SB_SS) {
+  transition({S, SB_SS, SB_S}, Load_S, SB_SS) {
     //yanan
     //h_load_hit;
     sendrequesth;
@@ -1666,6 +1666,15 @@ MachineType:L0Cache, 1, 1, id));
     k_popMandatoryQueue;
   }
 
+  transition(SB_S, Load, SB_S) {
+    //yanan
+    sendrequesth;
+    h_load_hit;
+    sendbuffer_h_n;
+    uu_profileDataHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
 
 
   //yanan
@@ -1699,7 +1708,7 @@ MachineType:L0Cache, 1, 1, id));
   }
 
   //yanan
-  transition({E, SB_EE}, Load_S, SB_EE) { 
+  transition({E, SB_EE, SB}, Load_S, SB_EE) { 
     //yanan
     sendrequesth;
     //h_load_hit;
@@ -1729,10 +1738,20 @@ MachineType:L0Cache, 1, 1, id));
     k_popMandatoryQueue;
   }
 
+  transition(SB, Load, SB) { 
+    //yanan
+    sendrequesth;
+    h_load_hit;
+    sendbuffer_h_n;
+    uu_profileDataHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
 
 
   //yanan
-  transition({S, SB_SS}, Ifetch_S, SB_SS) {
+  transition({S, SB_SS, SB_S}, Ifetch_S, SB_SS) {
     //yanan
     sendrequesth;
      //h_ifetch_hit;
@@ -1761,9 +1780,19 @@ MachineType:L0Cache, 1, 1, id));
     k_popMandatoryQueue;
   }
 
+  transition(SB_S, Ifetch, SB_S) {
+    //yanan
+    sendrequesth;
+     h_ifetch_hit;
+    sendbuffer_h_n;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
 
   //yanan
-  transition({E, SB_EE}, Ifetch_S, SB_EE) {
+  transition({E, SB_EE, SB}, Ifetch_S, SB_EE) {
     //yanan
     sendrequesth;
      //h_ifetch_hit;
@@ -1783,6 +1812,16 @@ MachineType:L0Cache, 1, 1, id));
   }
 
   transition(SB_EE, Ifetch, SB_EE) {
+    //yanan
+    sendrequesth;
+     h_ifetch_hit;
+    sendbuffer_h_n;
+    uu_profileInstHit;
+    po_observeHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(SB, Ifetch, SB) {
     //yanan
     sendrequesth;
      h_ifetch_hit;
