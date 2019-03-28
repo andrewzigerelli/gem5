@@ -26,7 +26,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "mem/ruby/structures/CacheMemory.hh"
 
 #include "base/intmath.hh"
@@ -37,6 +36,7 @@
 #include "debug/RubyCacheTrace.hh"
 #include "debug/RubyResourceStalls.hh"
 #include "debug/RubyStats.hh"
+#include "debug/infoflag.hh"
 #include "debug/stallflag.hh"
 #include "mem/protocol/AccessPermission.hh"
 #include "mem/ruby/system/RubySystem.hh"
@@ -89,6 +89,7 @@ CacheMemory::init()
     m_cache_num_sets = (m_cache_size / m_cache_assoc) / m_block_size;
     m_cache_num_sets_2 = (m_cache_size_2 / m_cache_assoc_2) / m_block_size;
     assert(m_cache_num_sets > 1);
+    DPRINTF(infoflag, "set num %d \n", m_cache_num_sets);
     m_cache_num_set_bits = floorLog2(m_cache_num_sets);
     m_cache_num_set_bits_2 = floorLog2(m_cache_num_sets_2);
     assert(m_cache_num_set_bits > 0);
