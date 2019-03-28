@@ -112,8 +112,17 @@ if [ "$1" = "--fs-options" ]; then
     exit
 fi
 
-#OUT_DIR="./"output"/"$DISK_IMAGE"/"$KERNEL"/L2_size_"$L2_SIZE
-OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+# make OUT_DIR depend on whether or not we are on crc machines
+IS_CRC=$(echo $HOSTNAME | grep -E "crc.pitt.edu" | wc -l)
+if ((IS_CRC == 0)); then
+    echo "We are not on a CRC machine."
+    OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+    echo "Output dir is $OUT_DIR"
+else
+    echo "We are on the a CRC machine."
+    OUT_DIR=$ZFS_HOME/output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+    echo "Output dir is $OUT_DIR"
+fi
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
