@@ -45,6 +45,7 @@ if env['PROTOCOL'] == 'None':
     Return()
 # yanan
 DebugFlag('alphaflag')
+DebugFlag('infoflag')
 #andrew RCT
 DebugFlag('RCTTrace')
 DebugFlag('RCTValidHisto')
