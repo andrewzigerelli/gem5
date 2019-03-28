@@ -729,9 +729,9 @@ in_msg.addr));
               DPRINTF(bufferflag, "replace\n");
               DPRINTF(bufferflag, "to be kick %llx \n",
                     L1Dcache.cacheProbe(in_msg.LineAddress));
-              Entry cache_eentry :=
-                    getCacheEntry(L1Dcache.cacheProbe(in_msg.LineAddress));
-              DPRINTF(bufferflag, "kick state %s \n", cache_eentry.CacheState);
+              //Entry cache_eentry :=
+              //      getCacheEntry(L1Dcache.cacheProbe(in_msg.LineAddress));
+              //DPRINTF(bufferflag, "kick state %s \n", cache_eentry.CacheState);
               trigger(Event:L1_Replacement, L1Dcache.cacheProbe(in_msg.LineAddress),
                       getL1DCacheEntry(L1Dcache.cacheProbe(in_msg.LineAddress)),
                       TBEs[L1Dcache.cacheProbe(in_msg.LineAddress)]);
@@ -768,9 +768,9 @@ in_msg.addr));
  
   action(testprint_store, "tss", desc="###") {
    DPRINTF(stallflag, "stall man %d\n", address); 
-   Tick a := clockEdge();
-   Cycles b := ticksToCycles(a);
-   DPRINTF(stallflag, "cycle %d\n",b );
+   //Tick a := clockEdge();
+   //Cycles b := ticksToCycles(a);
+   //DPRINTF(stallflag, "cycle %d\n",b );
   }
 
 

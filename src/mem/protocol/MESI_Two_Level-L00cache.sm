@@ -279,10 +279,10 @@ TBEs[in_msg.addr]);}
   //andrew
   action(delaySendBack, "dsb", desc="...") {
     DPRINTF(RCT, "addr L0 %llu\n", address);
-    Tick a := clockEdge();
-    Cycles b := ticksToCycles(a);
-    DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
-    DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
+    //Tick a := clockEdge();
+    //Cycles b := ticksToCycles(a);
+    //DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
+    //DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
     peek(delay_in, RequestMsg) {
        DPRINTF(yyflag, "addr in hit %llx\n", in_msg.addr);
        /* get random latency */

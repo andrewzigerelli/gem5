@@ -37,11 +37,13 @@ RCTBuffer::insert(Addr address, Cycles ret_cycle) {
     }
     else {
         loc->second.insert(ret_cycle);
+     /*
         if (DTRACE(RCT)) {
             for (Cycles const& cycle: loc->second) {
                 DPRINTFR(RCT, "cycle %llu\n", cycle);
             }
         }
+       */
         DPRINTFR(RCT, "number of counters is %d\n", ctrs);
     }
     DPRINTFR(RCT, "RCT buffer size is %d\n", rct_buffer.size());
