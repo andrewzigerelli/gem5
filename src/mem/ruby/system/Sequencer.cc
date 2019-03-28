@@ -338,8 +338,8 @@ Sequencer::recordMissLatency(const Cycles cycles, const RubyRequestType type,
     if (isExternalHit) {
         m_missLatencyHist.sample(cycles);
         m_missTypeLatencyHist[type]->sample(cycles);
-        if (CacheMiss && read) DPRINTF(missflag, "off chip %d\n", cycles);
-        else if (read) DPRINTF(missflag, "l2 hit %d\n", cycles);
+        if (CacheMiss && read) DPRINTFR(missflag, "off chip %d\n", cycles);
+        else if (read) DPRINTFR(missflag, "l2 hit %d\n", cycles);
         if (respondingMach != MachineType_NUM) {
             m_missMachLatencyHist[respondingMach]->sample(cycles);
             m_missTypeMachLatencyHist[type][respondingMach]->sample(cycles);
@@ -362,7 +362,7 @@ Sequencer::recordMissLatency(const Cycles cycles, const RubyRequestType type,
             }
         }
     } else {
-        if (read)DPRINTF(missflag, "l1 hit %d\n", cycles);
+        if (read)DPRINTFR(missflag, "l1 hit %d\n", cycles);
         m_hitLatencyHist.sample(cycles);
         m_hitTypeLatencyHist[type]->sample(cycles);
 
