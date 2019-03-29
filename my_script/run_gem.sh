@@ -6,6 +6,8 @@
 # ARE SET AS ENVIRONMENT VARIABLES!!!
 ###################################################
 
+# set for parameters
+RUN=all_stall
 
 BUILD=X86_MESI_Two_Level
 GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
@@ -46,7 +48,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=500000000
+MAXINSTS=1000000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -112,8 +114,16 @@ if [ "$1" = "--fs-options" ]; then
     exit
 fi
 
-#OUT_DIR="./"output"/"$DISK_IMAGE"/"$KERNEL"/L2_size_"$L2_SIZE
-OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+# make OUT_DIR depend on whether or not we are on crc machines
+if ((GEM_LOCAL == 1)); then
+    echo "We are not on a CRC machine."
+    OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
+    echo "Output dir is $OUT_DIR"
+else
+    echo "We are on a CRC machine."
+    OUT_DIR=$ZFS_HOME"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
+    echo "Output dir is $OUT_DIR"
+fi
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
@@ -163,12 +173,12 @@ BENCH_OPTIONS="--checkpoint-dir=$CKPT_DIR --script $BENCH_READFILE --kernel
 $KERNEL --disk-image $DISK_IMAGE --cpu-type=$CPU_TYPE
 --restore-with-cpu=$CKPT_CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS $RCT_CFG -r 1"
 BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
-BENCH_DEBUG_FLAG=RCTTrace
+BENCH_DEBUG_FLAG=missflag
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "--debug-file=$BENCH_DEBUG_FILE" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+#FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
 #FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
