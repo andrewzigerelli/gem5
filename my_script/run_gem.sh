@@ -6,6 +6,8 @@
 # ARE SET AS ENVIRONMENT VARIABLES!!!
 ###################################################
 
+# set for parameters
+RUN=all_stall
 
 BUILD=X86_MESI_Two_Level
 GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
@@ -113,16 +115,16 @@ if [ "$1" = "--fs-options" ]; then
 fi
 
 # make OUT_DIR depend on whether or not we are on crc machines
-IS_CRC=$(echo $HOSTNAME | grep -E "crc.pitt.edu" | wc -l)
-if ((IS_CRC == 0)); then
+if ((GEM_LOCAL == 1)); then
     echo "We are not on a CRC machine."
-    OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+    OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
     echo "Output dir is $OUT_DIR"
 else
-    echo "We are on the a CRC machine."
-    OUT_DIR=$ZFS_HOME/output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+    echo "We are on a CRC machine."
+    OUT_DIR=$ZFS_HOME/output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
     echo "Output dir is $OUT_DIR"
 fi
+exit
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
