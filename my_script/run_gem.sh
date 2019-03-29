@@ -7,7 +7,7 @@
 ###################################################
 
 # set for parameters
-RUN=all_stall
+RUN=no_stall
 
 BUILD=X86_MESI_Two_Level
 GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
@@ -124,7 +124,6 @@ else
     OUT_DIR=$ZFS_HOME/output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
     echo "Output dir is $OUT_DIR"
 fi
-exit
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
