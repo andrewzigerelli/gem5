@@ -7,7 +7,7 @@
 ###################################################
 
 # set for parameters
-RUN=all_stall
+RUN=stall_detection
 
 BUILD=X86_MESI_Two_Level
 GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
