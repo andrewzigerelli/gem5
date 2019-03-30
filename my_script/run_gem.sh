@@ -48,7 +48,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=10000000
+MAXINSTS=1000000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -121,10 +121,9 @@ if ((GEM_LOCAL == 1)); then
     echo "Output dir is $OUT_DIR"
 else
     echo "We are on a CRC machine."
-    OUT_DIR=$ZFS_HOME/output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
+    OUT_DIR=$ZFS_HOME"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL"/"$RUN
     echo "Output dir is $OUT_DIR"
 fi
-exit
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
