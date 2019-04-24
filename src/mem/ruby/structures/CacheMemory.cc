@@ -94,7 +94,7 @@ CacheMemory::init()
     m_cache_num_set_bits_2 = floorLog2(m_cache_num_sets_2);
     assert(m_cache_num_set_bits > 0);
     //yanan
-    for (int i = 0; i<10000; i++) stall_flag[i]=1;
+    for (int i = 0; i<10000; i++) stall_flag[i]=0;
     for (int i=0; i<10000; i++)
     {
         for (int j=0; j<2; j++) flag[i][j] = 0;
