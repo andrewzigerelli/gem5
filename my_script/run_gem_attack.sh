@@ -6,9 +6,9 @@
 # ARE SET AS ENVIRONMENT VARIABLES!!!
 ###################################################
 
-
+GEM5_PATH=~/Research/gem5
 BUILD=X86_MESI_Two_Level
-GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.perf
+GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.fast
 GDB_GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.debug
 ######## IF YOU CHANGE THIS, MAKE SURE TO RECHECKPOINT!!!
 #BENCH_GEM_CMD=$GEM5_PATH/build/X86_MOESI_AMD_Base/gem5.opt
@@ -21,7 +21,7 @@ CFG=$GEM5_PATH/configs/example/fs.py
 KERNEL_VERSION="4.19.0"
 KERNEL="vmlinux_"$KERNEL_VERSION
 CPU_TYPE="DerivO3CPU" # This is the cpu type you will ultimately run
-CPU_TYPE="AtomicSimpleCPU" # This is the cpu type you will ultimately run
+##CPU_TYPE="AtomicSimpleCPU" # This is the cpu type you will ultimately run
 CKPT_CPU_TYPE="AtomicSimpleCPU" # fast for ckpt purposes, if you change this
 MEM_SIZE="2GB"
 
@@ -32,7 +32,7 @@ NUM_COUNTERS="5"
 RCT_CFG="--rct_size $RCT_SIZE --num_ctrs $NUM_COUNTERS"
 
 ####CACHE_CONFIG
-CORE_NUM="2"
+CORE_NUM="1"
 L1D_SIZE="32kB"
 L1I_SIZE="32kB"
 L1D_ASSOC="8"
@@ -40,7 +40,6 @@ L1I_ASSOC="8"
 
 L2_SIZE="2MB"
 L2_ASSOC="16"
-
 L3_SIZE="2MB"
 L3_ASSOC="8"
 
@@ -73,7 +72,7 @@ CMD_LINE='earlyprintk=ttyS0 console=ttyS0 console_msg_format=syslog lpj=7999923 
 #### SET UP GEM5 OPTIONS FOR FS.PY
 # we don't distinguish between ruby and non ruby checkpoints
 # we save checkpoints in own paths for convenience
-CKPT_DIR=$GEM5_PATH"/"my_script"/"checkpoints"/"$BUILD"/"attack
+CKPT_DIR=$GEM5_PATH"/"my_script"/"checkpoints"/"$BUILD"/attack/"$CORE_NUM"_core"
 
 
 ### readfile for gem5
@@ -114,7 +113,7 @@ if [ "$1" = "--fs-options" ]; then
 fi
 
 #OUT_DIR="./"output"/"$DISK_IMAGE"/"$KERNEL"/L2_size_"$L2_SIZE
-OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/attack/"$DISK_IMAGE"/"$KERNEL
+OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/attack/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
 
 #### setup checkpointing
 # setup readfile for initial checkpoint

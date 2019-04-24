@@ -411,8 +411,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
       if(stallRequest_in.isReady(clockEdge())) {
         peek(stallRequest_in, RequestMsg, block_on="addr") {
             DPRINTF(stallflag, "stall address %llx\n", in_msg.addr);
-            L1Icache.setSetFlag_2(in_msg.addr);
-            L1Dcache.setSetFlag_2(in_msg.addr);
+           // L1Icache.setSetFlag_2(in_msg.addr);
+           // L1Dcache.setSetFlag_2(in_msg.addr);
         }
         stallRequest_in.dequeue(clockEdge());
       }
@@ -421,8 +421,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
       if(resetRequest_in.isReady(clockEdge())) {
         peek(resetRequest_in, RequestMsg, block_on="addr") {
             DPRINTF(yyflag, "recover address %llx\n", in_msg.addr);
-            L1Icache.resetSetFlag_2(in_msg.addr);
-            L1Dcache.resetSetFlag_2(in_msg.addr);
+          //  L1Icache.resetSetFlag_2(in_msg.addr);
+          //  L1Dcache.resetSetFlag_2(in_msg.addr);
         }
         resetRequest_in.dequeue(clockEdge());
       }
