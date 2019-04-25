@@ -118,6 +118,7 @@ class CacheMemory : public SimObject
     int NodeToInt(NodeID id);
     bool resetSetFlag(Addr address, int id);
     void resetSetFlag_2(Addr address);
+    void fre_record(Addr address, int id, Cycles cycle);
     // Functions for locking and unlocking cache lines corresponding to the
     // provided address.  These are required for supporting atomic memory
     // accesses.  These are to be used when only the address of the cache entry
@@ -220,6 +221,7 @@ class CacheMemory : public SimObject
     int flag[10000][2];
     int stall_flag[10000];
     int stall2[10000][2];
+    int fre_rec[10000][3];
     //andrew
     //rct structure
     RCTBuffer rct_buffer;

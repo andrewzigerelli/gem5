@@ -36,6 +36,7 @@
 #include "debug/RubyCacheTrace.hh"
 #include "debug/RubyResourceStalls.hh"
 #include "debug/RubyStats.hh"
+#include "debug/fre_stats.hh" //yanan
 #include "debug/infoflag.hh"
 #include "debug/stallflag.hh"
 #include "mem/protocol/AccessPermission.hh"
@@ -103,7 +104,9 @@ CacheMemory::init()
     {
         for (int j = 0; j<2; j++) stall2[i][j] = 0;
     }
-
+    for (int i = 0; i<10000; i++)
+        for (int j = 0; j<3; j++)
+            fre_rec[i][j] = 0;
     m_cache.resize(m_cache_num_sets,
                     std::vector<AbstractCacheEntry*>(m_cache_assoc, nullptr));
 }
@@ -212,7 +215,26 @@ CacheMemory::resetSetFlag(Addr address, int id)
     else return false;
 }
 
+void CacheMemory::fre_record(Addr address, int id, Cycles cycle)
+{
+    int64_t CacheSet = addressToCacheSet(address);
+    int index = cycle % 1000;
+    //DPRINTF(fre_stats, "cycle%d\n",cycle);
+    if (index == fre_rec[CacheSet][0]) fre_rec[CacheSet][1] ++;
+    if (index > fre_rec[CacheSet][0])
+    {
+        if (fre_rec[CacheSet][1] > fre_rec[CacheSet][2])
+        {
+            DPRINTF(fre_stats, "set%d count%d cycle%d\n",
+                    CacheSet, fre_rec[CacheSet][1], cycle);
+            fre_rec[CacheSet][2] = fre_rec[CacheSet][1];
+        }
+        fre_rec[CacheSet][0] = index;
+        fre_rec[CacheSet][1] = 1;
 
+    }
+
+}
 
 
 
