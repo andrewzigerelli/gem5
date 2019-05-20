@@ -312,6 +312,9 @@ def addCommonOptions(parser):
                       choices=["arm", "thumb", "aarch64"],
                       help="ARM instruction set.")
 
+    # rct options andrew
+    parser.add_option("--rct_size", type="int", default="100")
+    parser.add_option("--num_ctrs", type="int", default="10")
 
 def addSEOptions(parser):
     # Benchmark options
@@ -390,7 +393,3 @@ def addFSOptions(parser):
     parser.add_option("--command-line-file", action="store",
                       default=None, type="string",
                       help="File with a template for the kernel command line")
-
-    # rct options andrew
-    parser.add_option("--rct_size", type="int", default="100")
-    parser.add_option("--num_ctrs", type="int", default="10")
