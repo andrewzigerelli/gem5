@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/525.x264_r/run/run_base_refrate_myconf-m64.0000
+--cmd=x264_r_base.myconf-m64 --options="--seek 500 --dumpyuv 200 --frames 1250 -o BuckBunny_New.264 BuckBunny.yuv 1280x720"
+run_0500-1250_x264_r_base.myconf-m64_x264.out
+run_0500-1250_x264_r_base.myconf-m64_x264.err

@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/641.leela_s/run/run_base_refspeed_myconf-m64.0000
+--cmd=leela_s_base.myconf-m64 --options="ref.sgf"
+ref.out
+ref.err

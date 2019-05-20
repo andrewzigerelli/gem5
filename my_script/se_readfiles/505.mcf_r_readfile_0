@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/505.mcf_r/run/run_base_refrate_myconf-m64.0000
+--cmd=mcf_r_base.myconf-m64 --options="inp.in"
+inp.out
+inp.err

@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/625.x264_s/run/run_base_refspeed_myconf-m64.0000
+--cmd=x264_s_base.myconf-m64 --options="--pass 1 --stats x264_stats.log --bitrate 1000 --frames 1000 -o BuckBunny_New.264 BuckBunny.yuv 1280x720"
+run_000-1000_x264_s_base.myconf-m64_x264_pass1.out
+run_000-1000_x264_s_base.myconf-m64_x264_pass1.err

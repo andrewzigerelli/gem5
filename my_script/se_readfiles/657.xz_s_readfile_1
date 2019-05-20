@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/657.xz_s/run/run_base_refspeed_myconf-m64.0000
+--cmd=xz_s_base.myconf-m64 --options="cld.tar.xz 1400 19cf30ae51eddcbefda78dd06014b4b96281456e078ca7c13e1c0c9e6aaea8dff3efb4ad6b0456697718cede6bd5454852652806a657bb56e07d61128434b474 536995164 539938872 8"
+cld.tar-1400-8.out
+cld.tar-1400-8.err

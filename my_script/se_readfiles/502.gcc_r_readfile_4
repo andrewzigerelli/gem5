@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/502.gcc_r/run/run_base_refrate_myconf-m64.0000
+--cmd=cpugcc_r_base.myconf-m64 --options="ref32.c -O3 -fselective-scheduling -fselective-scheduling2 -o ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.s"
+ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.out
+ref32.opts-O3_-fselective-scheduling_-fselective-scheduling2.err

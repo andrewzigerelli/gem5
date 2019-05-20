@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/523.xalancbmk_r/run/run_base_refrate_myconf-m64.0000
+--cmd=cpuxalan_r_base.myconf-m64 --options="-v t5.xml xalanc.xsl"
+ref-t5.out
+ref-t5.err

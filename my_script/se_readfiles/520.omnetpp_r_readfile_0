@@ -1,0 +1,4 @@
+/opt/spec2017/benchspec/CPU/520.omnetpp_r/run/run_base_refrate_myconf-m64.0000
+--cmd=omnetpp_r_base.myconf-m64 --options="-c General -r 0"
+omnetpp.General-0.out
+omnetpp.General-0.err
