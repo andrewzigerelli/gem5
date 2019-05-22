@@ -622,8 +622,18 @@ in_msg.addr));
         DPRINTF(bufferflag, "addr in manda %llx\n", in_msg.LineAddress);
         
         DPRINTF(bufferflag, "physical addr in manda %llx\n", in_msg.PhysicalAddress);
+        DPRINTF(frecflag, "%llx    ", in_msg.PhysicalAddress);
+        DPRINTF(frecflag,"%d    ",
+        L1Dcache.addressToCacheSet_2(in_msg.PhysicalAddress));
         //Tick currentTime := clockEdge();
         //Cycles ldtime := ticksToCycles(currentTime);
+
+        //yanan for recording frequency
+        Tick a := clockEdge();
+        Cycles b := ticksToCycles(a);
+        DPRINTF(frecflag, "%d\n", b);
+        L1Dcache.fre_record(in_msg.PhysicalAddress, machineIDToNodeID(machineID),
+        b);
 
 
         // Check for data access to blocks in I-cache and ifetchs to blocks in D-cache

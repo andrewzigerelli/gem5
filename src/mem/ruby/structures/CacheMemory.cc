@@ -131,7 +131,7 @@ CacheMemory::addressToCacheSet(Addr address) const
                      m_start_index_bit + m_cache_num_set_bits - 1);
 }
 //yanan only used for L1 stalling
-int64_t
+int
 CacheMemory::addressToCacheSet_2(Addr address) const
 {
     return bitSelect(address, m_start_index_bit_2,
@@ -217,19 +217,22 @@ CacheMemory::resetSetFlag(Addr address, int id)
 
 void CacheMemory::fre_record(Addr address, int id, Cycles cycle)
 {
-    int64_t CacheSet = addressToCacheSet(address);
-    int index = cycle % 1000;
+    int64_t CacheSet = addressToCacheSet_2(address);
+    int offset = cycle % 1000;
+    int index = (cycle - offset) / 1000;
     //DPRINTF(fre_stats, "cycle%d\n",cycle);
     if (index == fre_rec[CacheSet][0]) fre_rec[CacheSet][1] ++;
     if (index > fre_rec[CacheSet][0])
     {
         if (fre_rec[CacheSet][1] > fre_rec[CacheSet][2])
         {
-            DPRINTF(fre_stats, "set%d count%d cycle%d\n",
-                    CacheSet, fre_rec[CacheSet][1], cycle);
+            //DPRINTF(fre_stats, "set%d count%d cycle%d\n",
+            //        CacheSet, fre_rec[CacheSet][1], cycle);
             fre_rec[CacheSet][2] = fre_rec[CacheSet][1];
         }
         fre_rec[CacheSet][0] = index;
+        DPRINTF(fre_stats, "set%d count%d cycle%d\n", CacheSet,
+                fre_rec[CacheSet][1], cycle);
         fre_rec[CacheSet][1] = 1;
 
     }

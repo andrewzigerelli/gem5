@@ -373,10 +373,10 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
         Entry cache_entry := getCacheEntry(in_msg.addr);
         TBE tbe := TBEs[in_msg.addr];
         //yanan
-        Tick a := clockEdge();
-        Cycles b := ticksToCycles(a);
-        L2cache.fre_record(in_msg.addr, machineIDToNodeID(in_msg.Requestor),
-        b);        
+        //Tick a := clockEdge();
+        //Cycles b := ticksToCycles(a);
+        //L2cache.fre_record(in_msg.addr, machineIDToNodeID(in_msg.Requestor),
+        //b);        
 
 
         DPRINTF(RubySlicc, "Addr: %#x State: %s Req: %s Type: %s Dest: %s\n",

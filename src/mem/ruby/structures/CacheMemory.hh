@@ -172,6 +172,7 @@ class CacheMemory : public SimObject
     Cycles sampleHistogram();
     Cycles getIssueTime(Addr address);
     Cycles validSampleHistogram(Cycles issue_time, Cycles cur_cycle);
+    int addressToCacheSet_2(Addr address) const;
 
 
 
@@ -179,7 +180,6 @@ class CacheMemory : public SimObject
     // convert a Address to its location in the cache
     int64_t addressToCacheSet(Addr address) const;
     //yanan
-    int64_t addressToCacheSet_2(Addr address) const;
     // Given a cache tag: returns the index of the tag in a set.
     // returns -1 if the tag is not found.
     int findTagInSet(int64_t line, Addr tag) const;
