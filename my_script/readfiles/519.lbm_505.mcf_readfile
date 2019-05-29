@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/519.lbm_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/lbm_r_base.myconf-m64 3000 reference.dat 0 0 100_100_130_ldc.of > lbm.out 2>> lbm.err &;cd /opt/spec2017/benchspec/CPU/505.mcf_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/mcf_r_base.myconf-m64 inp.in  > inp.out 2>> inp.err;m5 exit;

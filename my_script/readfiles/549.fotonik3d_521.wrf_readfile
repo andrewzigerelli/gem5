@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/549.fotonik3d_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/fotonik3d_r_base.myconf-m64 > fotonik3d_r.log 2>> fotonik3d_r.err &;cd /opt/spec2017/benchspec/CPU/521.wrf_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/wrf_r_base.myconf-m64 > rsl.out.0000 2>> wrf.err;m5 exit;

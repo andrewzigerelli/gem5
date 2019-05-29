@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/502.gcc_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/cpugcc_r_base.myconf-m64 ref32.c -O5 -o ref32.opts-O5.s > ref32.opts-O5.out 2>> ref32.opts-O5.err;m5 exit;

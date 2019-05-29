@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/605.mcf_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/mcf_s_base.myconf-m64 inp.in  > inp.out 2>> inp.err;m5 exit;

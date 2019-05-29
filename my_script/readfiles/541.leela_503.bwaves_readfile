@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/541.leela_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/leela_r_base.myconf-m64 ref.sgf > ref.out 2>> ref.err &;cd /opt/spec2017/benchspec/CPU/503.bwaves_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/bwaves_r_base.myconf-m64 bwaves_1 < bwaves_1.in > bwaves_1.out 2>> bwaves_1.err;m5 exit;

@@ -1,0 +1,1 @@
+cd /opt/spec2017/benchspec/CPU/510.parest_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/parest_r_base.myconf-m64 ref.prm > ref.out 2>> ref.err &;cd /opt/spec2017/benchspec/CPU/505.mcf_r/run/run_base_refrate_myconf-m64.0000;../run_base_refrate_myconf-m64.0000/mcf_r_base.myconf-m64 inp.in  > inp.out 2>> inp.err;m5 exit;
