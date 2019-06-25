@@ -33,4 +33,4 @@ new.txt
 out
 *.swn
 *.swm
-readfiles/*
+readfiles
