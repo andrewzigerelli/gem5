@@ -8,7 +8,7 @@
 
 GEM5_PATH=~/Research/gem5
 BUILD=X86_MESI_Two_Level
-GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.fast
+GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
 GDB_GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.debug
 ######## IF YOU CHANGE THIS, MAKE SURE TO RECHECKPOINT!!!
 #BENCH_GEM_CMD=$GEM5_PATH/build/X86_MOESI_AMD_Base/gem5.opt
@@ -151,16 +151,15 @@ BENCH_OPTIONS="--checkpoint-dir=$CKPT_DIR --kernel
 $KERNEL --disk-image $DISK_IMAGE --cpu-type=$CPU_TYPE
 --restore-with-cpu=$CKPT_CPU_TYPE --mem-size $MEM_SIZE $CACHE_OPTIONS $RCT_CFG -r 1"
 BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
-BENCH_DEBUG_FLAG=infoflag
+BENCH_DEBUG_FLAG=fre_stats
 BENCH_DEBUG_FILE=my_trace.out.gz
 BENCH_OUT_DEBUG_START=2600000000000
 #buid full cmd, potentially unsafe if you screw up the builder variables
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG"
-"--debug-start=$BENCH_OUT_DEBUG_START" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
 #FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+##FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
 
 DEBUG_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
