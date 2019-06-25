@@ -1,1 +1,0 @@
-cd /opt/spec2017/benchspec/CPU/600.perlbench_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/perlbench_s_base.myconf-m64 -I./lib checkspam.pl 2500 5 25 11 150 1 1 1 1 > checkspam.2500.5.25.11.150.1.1.1.1.out 2>> checkspam.2500.5.25.11.150.1.1.1.1.err;m5 exit;

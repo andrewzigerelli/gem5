@@ -1,1 +1,0 @@
-cd /opt/spec2017/benchspec/CPU/628.pop2_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/speed_pop2_base.myconf-m64 > pop2_s.out 2>> pop2_s.err;m5 exit;

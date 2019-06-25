@@ -1,1 +1,0 @@
-cd /opt/spec2017/benchspec/CPU/620.omnetpp_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/omnetpp_s_base.myconf-m64 -c General -r 0 > omnetpp.General-0.out 2>> omnetpp.General-0.err;m5 exit;

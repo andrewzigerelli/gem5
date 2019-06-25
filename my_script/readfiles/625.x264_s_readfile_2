@@ -1,1 +1,0 @@
-cd /opt/spec2017/benchspec/CPU/625.x264_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/x264_s_base.myconf-m64 --seek 500 --dumpyuv 200 --frames 1250 -o BuckBunny_New.264 BuckBunny.yuv 1280x720 > run_0500-1250_x264_s_base.myconf-m64_x264.out 2>> run_0500-1250_x264_s_base.myconf-m64_x264.err;m5 exit;

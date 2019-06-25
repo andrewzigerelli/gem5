@@ -1,1 +1,0 @@
-cd /opt/spec2017/benchspec/CPU/600.perlbench_s/run/run_base_refspeed_myconf-m64.0000;../run_base_refspeed_myconf-m64.0000/perlbench_s_base.myconf-m64 -I./lib diffmail.pl 4 800 10 17 19 300 > diffmail.4.800.10.17.19.300.out 2>> diffmail.4.800.10.17.19.300.err;m5 exit;
