@@ -8,6 +8,11 @@ from itertools import combinations
 
 def main():
     # parse args
+    # run directions:
+    #       python GenSpecInputs_Multiple.py MODE NUM"
+    # e.g.
+    #       python GenSpecInputs_Multiple.py fs 3
+    # will generate fs readfiles, with combinations of 3 benchmarks
     try:
         mode = sys.argv[1]
         mode = mode.rstrip()
@@ -63,10 +68,12 @@ def createReadfile(combo, readfiles, readfile_path, mode):
         underscore_loc = bench.find("_")
         combo_name = combo_name + bench[:underscore_loc+1]
 
-        # get cmd from existing readfile, remove m5 exit, append &;
+        # get cmd from existing readfile, remove m5 exit, append & with space
+        # do not append ; after & because bash complains
+        # &; is fine for zsh
         bench_readfile = readfiles[bench]
         with open(bench_readfile, 'r') as readfile:
-            cmd = readfile.read().replace(';m5 exit;', ' &;')
+            cmd = readfile.read().replace(';m5 exit;', ' & ')
             cmds += cmd
 
     # finish combo name
