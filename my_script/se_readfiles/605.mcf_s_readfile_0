@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/605.mcf_s/run/run_base_refspeed_myconf-m64.0000
---cmd=mcf_s_base.myconf-m64 --options="inp.in"
-inp.out
-inp.err

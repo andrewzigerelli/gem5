@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/623.xalancbmk_s/run/run_base_refspeed_myconf-m64.0000
---cmd=xalancbmk_s_base.myconf-m64 --options="-v t5.xml xalanc.xsl"
-ref-t5.out
-ref-t5.err

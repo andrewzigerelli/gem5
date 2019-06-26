@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/607.cactuBSSN_s/run/run_base_refspeed_myconf-m64.0000
---cmd=cactuBSSN_s_base.myconf-m64 --options="spec_ref.par"
-spec_ref.out
-spec_ref.err

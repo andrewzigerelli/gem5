@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/996.specrand_fs/run/run_base_refspeed_myconf-m64.0000
---cmd=specrand_fs_base.myconf-m64 --options="1255432124 234923"
-rand.234923.out
-rand.234923.err

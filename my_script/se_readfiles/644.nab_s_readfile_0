@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/644.nab_s/run/run_base_refspeed_myconf-m64.0000
---cmd=nab_s_base.myconf-m64 --options="3j1n 20140317 220"
-3j1n.out
-3j1n.err

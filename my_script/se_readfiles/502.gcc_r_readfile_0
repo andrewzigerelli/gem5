@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/502.gcc_r/run/run_base_refrate_myconf-m64.0000
---cmd=cpugcc_r_base.myconf-m64 --options="gcc-pp.c -O3 -finline-limit=0 -fif-conversion -fif-conversion2 -o gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.s"
-gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.out
-gcc-pp.opts-O3_-finline-limit_0_-fif-conversion_-fif-conversion2.err

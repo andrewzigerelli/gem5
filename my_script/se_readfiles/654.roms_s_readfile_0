@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/654.roms_s/run/run_base_refspeed_myconf-m64.0000
---cmd=sroms_base.myconf-m64 --input=ocean_benchmark3.in
-ocean_benchmark3.log
-ocean_benchmark3.err

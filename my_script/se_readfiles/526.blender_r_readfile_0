@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/526.blender_r/run/run_base_refrate_myconf-m64.0000
---cmd=blender_r_base.myconf-m64 --options="sh3_no_char.blend --render-output sh3_no_char_ --threads 1 -b -F RAWTGA -s 849 -e 849 -a"
-sh3_no_char.849.spec.out
-sh3_no_char.849.spec.err

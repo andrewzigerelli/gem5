@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/649.fotonik3d_s/run/run_base_refspeed_myconf-m64.0000
---cmd=fotonik3d_s_base.myconf-m64
-fotonik3d_s.log
-fotonik3d_s.err

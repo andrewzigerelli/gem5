@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/600.perlbench_s/run/run_base_refspeed_myconf-m64.0000
---cmd=perlbench_s_base.myconf-m64 --options="-I./lib splitmail.pl 6400 12 26 16 100 0"
-splitmail.6400.12.26.16.100.0.out
-splitmail.6400.12.26.16.100.0.err

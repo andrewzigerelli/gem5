@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/503.bwaves_r/run/run_base_refrate_myconf-m64.0000
---cmd=bwaves_r_base.myconf-m64 --options="bwaves_1" --input=bwaves_1.in
-bwaves_1.out
-bwaves_1.err

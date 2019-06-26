@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/511.povray_r/run/run_base_refrate_myconf-m64.0000
---cmd=povray_r_base.myconf-m64 --options="SPEC-benchmark-ref.ini"
-SPEC-benchmark-ref.stdout
-SPEC-benchmark-ref.stderr

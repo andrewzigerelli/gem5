@@ -1,4 +1,0 @@
-/opt/spec2017/benchspec/CPU/508.namd_r/run/run_base_refrate_myconf-m64.0000
---cmd=namd_r_base.myconf-m64 --options="--input apoa1.input --output apoa1.ref.output --iterations 65"
-namd.out
-namd.err
