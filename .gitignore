@@ -35,3 +35,4 @@ out
 *.swm
 readfiles
 se_readfiles
+*.patch
