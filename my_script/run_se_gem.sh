@@ -54,7 +54,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=500000000
+MAXINSTS=1000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -167,29 +167,29 @@ fi
 ### BENCHMARK OPTIONS
 READFILE_NUMBER=0
 BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
-BENCH_DIR=$(head -n 1 "$(pwd)/se_readfiles/$BENCHMARK")
-BENCH_CMD=$(head -n 2 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1)
+#BENCH_DIR=$(head -n 1 "$(pwd)/se_readfiles/$BENCHMARK")
+BENCH_CMD='--cmd='$(head -n 1 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1)
+BENCH_OPTIONS='--options='$(head -n 2 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1)
+BENCH_STDIN='--input='$(head -n 3 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1)
+BENCH_STDOUT='--output='$BENCH_OUT_DIR/$(head -n 4 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1)
+BENCH_STDERR='--errout='$BENCH_OUT_DIR/$(head -n 5 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1) 
 
-BENCH_STDOUT='--output='$BENCH_OUT_DIR/$(head -n 3 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1)
-BENCH_STDERR='--errout='$BENCH_OUT_DIR/$(head -n 4 "$(pwd)/se_readfiles/$BENCHMARK" | tail -n 1) 
+BENCH_CMD=$BENCH_CMD" "$BENCH_OPTIONS" "$BENCH_STDIN" "$BENCH_STDOUT" "$BENCH_STDERR
 
-BENCH_CMD=$BENCH_CMD" "$BENCH_STDOUT" "$BENCH_STDERR
+BENCH_CFG="--checkpoint-dir=$CKPT_DIR $BENCH_CMD
+--cpu-type=$CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS
+$RCT_CFG"
 
-BENCH_OPTIONS="--checkpoint-dir=$CKPT_DIR $BENCH_CMD
+BENCH_CFG="$BENCH_CMD
 --cpu-type=$CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS
 $RCT_CFG"
 
 BENCH_DEBUG_FLAG=fre_stats
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS
+FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_CFG
 
-#FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
-
-#FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
-
-
-DEBUG_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+DEBUG_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_CFG" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 if [ "$1" = "--dry-run" ]; then
     echo $FULL_CMD
     exit
@@ -205,5 +205,5 @@ if [ "$1" = "--rr" ]; then
     exit
 fi
 
-cd $BENCH_DIR
+#cd $BENCH_DIR
 eval $FULL_CMD
