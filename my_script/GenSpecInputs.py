@@ -114,8 +114,11 @@ def main():
     # write to
     specFile.close()
 
+    # remove copies of benchmarks
+    SPEC2017_ = [ bench for bench in SPEC2017 if bench.num == 0 ]
+
     # make combinations and write to readfile
-    combos = combinations(SPEC2017, num_combo)
+    combos = combinations(SPEC2017_, num_combo)
     cwd = os.getcwd()
     fsReadfileDir = os.path.join(cwd, "readfiles")
     seReadfileDir = os.path.join(cwd, "se_readfiles")
@@ -144,11 +147,11 @@ def main():
         fs_cmds = fs_cmds.strip(' &')
         fs_cmds = fs_cmds + ";m5 exit;"
         # remove last ;
-        se_cmds = se_cmds[:-1]
-        options = options[:-1]
-        inputs = inputs[:-1]
-        outputs = outputs[:-1]
-        stderrs = stderrs[:-1]
+        se_cmds = '"' + se_cmds[:-1] + '"'
+        options = '"' + options[:-1] + '"'
+        inputs = '"' + inputs[:-1] + '"'
+        outputs = '"' + outputs[:-1] + '"'
+        stderrs = '"' + stderrs[:-1] + '"'
 
         # write fs readfile
         fsReadfile = os.path.join(fsReadfileDir, readfile_name)
@@ -270,8 +273,8 @@ def fixOptions(options, runFolder):
             option = test_option
         new_options.append(option)
 
-    # make quote string
-    new_options = '"' + ' '.join(new_options) + '"'
+    # make string
+    new_options = ' '.join(new_options)
     return new_options
 
 
