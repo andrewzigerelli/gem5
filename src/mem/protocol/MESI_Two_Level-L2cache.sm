@@ -372,12 +372,6 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       peek(L1RequestL2Network_in,  RequestMsg) {
         Entry cache_entry := getCacheEntry(in_msg.addr);
         TBE tbe := TBEs[in_msg.addr];
-        //yanan
-        Tick a := clockEdge();
-        Cycles b := ticksToCycles(a);
-        L2cache.fre_record(in_msg.addr, machineIDToNodeID(in_msg.Requestor),
-        b);        
-
 
         DPRINTF(RubySlicc, "Addr: %#x State: %s Req: %s Type: %s Dest: %s\n",
                 in_msg.addr, getState(tbe, cache_entry, in_msg.addr),
@@ -796,10 +790,16 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
 
   action(uu_profileMiss, "\um", desc="Profile the demand miss") {
       ++L2cache.demand_misses;
+      Tick a := clockEdge();
+      Cycles b := ticksToCycles(a);
+      L2cache.accessRecord(address, b);
   }
 
   action(uu_profileHit, "\uh", desc="Profile the demand hit") {
       ++L2cache.demand_hits;
+      Tick a := clockEdge();
+      Cycles b := ticksToCycles(a);
+      L2cache.accessRecord(address, b);
   }
 
   action(nn_addSharer, "\n", desc="Add L1 sharer to list") {

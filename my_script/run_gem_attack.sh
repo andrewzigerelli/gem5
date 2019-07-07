@@ -18,7 +18,7 @@ CFG=$GEM5_PATH/configs/example/fs.py
 ####### CFG OPTIONS
 ######  KERNEL AND DISK IMAGE ARE TO BE LOCATED IN
 ######  M5_PATH/binaries and M5_PATH/disks respectively
-KERNEL_VERSION="4.19.0"
+KERNEL_VERSION="4.19.2"
 KERNEL="vmlinux_"$KERNEL_VERSION
 CPU_TYPE="DerivO3CPU" # This is the cpu type you will ultimately run
 ##CPU_TYPE="AtomicSimpleCPU" # This is the cpu type you will ultimately run
@@ -151,7 +151,7 @@ BENCH_OPTIONS="--checkpoint-dir=$CKPT_DIR --kernel
 $KERNEL --disk-image $DISK_IMAGE --cpu-type=$CPU_TYPE
 --restore-with-cpu=$CKPT_CPU_TYPE --mem-size $MEM_SIZE $CACHE_OPTIONS $RCT_CFG -r 1"
 BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
-BENCH_DEBUG_FLAG=fre_stats
+BENCH_DEBUG_FLAG=testflag1
 BENCH_DEBUG_FILE=my_trace.out.gz
 BENCH_OUT_DEBUG_START=2600000000000
 #buid full cmd, potentially unsafe if you screw up the builder variables

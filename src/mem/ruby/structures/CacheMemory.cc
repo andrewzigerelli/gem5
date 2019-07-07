@@ -39,6 +39,7 @@
 #include "debug/fre_stats.hh" //yanan
 #include "debug/infoflag.hh"
 #include "debug/stallflag.hh"
+#include "debug/testflag1.hh"
 #include "mem/protocol/AccessPermission.hh"
 #include "mem/ruby/system/RubySystem.hh"
 #include "mem/ruby/system/WeightedLRUPolicy.hh"
@@ -96,6 +97,12 @@ CacheMemory::init()
     assert(m_cache_num_set_bits > 0);
     //yanan
     for (int i = 0; i<10000; i++) stall_flag[i]=0;
+    for (int i = 0; i<2048; i++)
+    {
+        for (int j  = 0; j < 1000; j++)
+            access_record[i][j]=Cycles(0);
+    }
+    for (int i = 0; i<2048; i++) record_num[i] = 0;
     for (int i=0; i<10000; i++)
     {
         for (int j=0; j<2; j++) flag[i][j] = 0;
@@ -215,10 +222,36 @@ CacheMemory::resetSetFlag(Addr address, int id)
     else return false;
 }
 
+//yanan
+void
+CacheMemory::accessRecord(Addr address, Cycles time)
+{
+    int set = addressToCacheSet(address);
+    if (record_num[set] > 10)
+    int i;
+    int j;
+    for (i = 0; i < record_num[set]; i++)
+    {
+        if ((time - access_record[set][i]) < Cycles(10000))
+        {
+            //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
+            break;
+        }
+    }
+    for (j = 0; j < (record_num[set] - i); j++)
+    {
+        access_record[set][j] = access_record[set][j + i];
+    }
+    record_num[set] = record_num[set] - i + 1;
+    access_record[set][record_num[set] - 1] = time;
+
+}
+
+
 void CacheMemory::fre_record(Addr address, int id, Cycles cycle)
 {
     int64_t CacheSet = addressToCacheSet(address);
-    int index = cycle % 1000;
+    int index = (cycle - (cycle % 1000))/1000;
     //DPRINTF(fre_stats, "cycle%d\n",cycle);
     if (index == fre_rec[CacheSet][0]) fre_rec[CacheSet][1] ++;
     if (index > fre_rec[CacheSet][0])

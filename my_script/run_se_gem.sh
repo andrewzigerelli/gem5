@@ -39,7 +39,7 @@ NUM_COUNTERS="5"
 RCT_CFG="--rct_size $RCT_SIZE --num_ctrs $NUM_COUNTERS"
 
 ####CACHE_CONFIG
-CORE_NUM="1"
+CORE_NUM="4"
 L1D_SIZE="32kB"
 L1I_SIZE="32kB"
 L1D_ASSOC="8"
@@ -54,7 +54,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=1000000
+MAXINSTS=100000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -184,10 +184,12 @@ BENCH_CFG="$BENCH_CMD
 --cpu-type=$CPU_TYPE --maxinsts=$MAXINSTS --mem-size $MEM_SIZE $CACHE_OPTIONS
 $RCT_CFG"
 
-BENCH_DEBUG_FLAG=fre_stats
+BENCH_DEBUG_FLAG=testflag1
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_CFG
+FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_CFG
+
 
 DEBUG_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_CFG" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 if [ "$1" = "--dry-run" ]; then

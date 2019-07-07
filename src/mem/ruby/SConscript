@@ -47,6 +47,8 @@ if env['PROTOCOL'] == 'None':
 DebugFlag('alphaflag')
 DebugFlag('infoflag')
 DebugFlag('fre_stats')
+DebugFlag('testflag1')
+
 #andrew RCT
 DebugFlag('RCTTrace')
 DebugFlag('RCTValidHisto')
