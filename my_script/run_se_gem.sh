@@ -28,7 +28,7 @@ CFG=$GEM5_PATH/configs/example/se.py
 ######  M5_PATH/binaries and M5_PATH/disks respectively
 KERNEL_VERSION="4.19.0"
 KERNEL="vmlinux_"$KERNEL_VERSION
-CPU_TYPE="DerivO3CPU" # This is the cpu type you will ultimately run
+CPU_TYPE="TimingSimpleCPU" # This is the cpu type you will ultimately run
 CKPT_CPU_TYPE="AtomicSimpleCPU" # fast for ckpt purposes, if you change this
 MEM_SIZE="2GB"
 
