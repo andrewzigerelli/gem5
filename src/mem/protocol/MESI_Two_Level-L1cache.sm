@@ -66,6 +66,14 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
    MessageBuffer * missToBuff, network="To", virtual_network="4",
          vnet_type="request";
 
+   //yanan
+   MessageBuffer * recordToL2, network="To", virtual_network="7",
+        vnet_type="request";
+
+
+
+
+
    //yanan recover from stalling
    MessageBuffer * resetRequestFromL2, network="From", virtual_network="5",
         vnet_type="request";
@@ -386,6 +394,7 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   out_port(delayhToBuff_out, RequestMsg, delayhToBuff);
   out_port(delaymToBuff_out, RequestMsg, delaymToBuff);
   out_port(missToBuff_out, RequestMsg, missToBuff);
+  out_port(recordToL2_out, RequestMsg, recordToL2);
 
   // Prefetch queue between the controller and the prefetcher
   // As per Spracklen et al. (HPCA 2005), the prefetch queue should be
@@ -1450,6 +1459,17 @@ MachineType:L0Cache, 1, 1, id));
 
   action(uu_profileInstHit, "\uih", desc="Profile the demand hit") {
       ++L1Icache.demand_hits;
+      enqueue(recordToL2_out, RequestMsg, to_l2_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:GETS;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToRange(address, MachineType:L2Cache,
+        l2_select_low_bit, l2_select_num_bits, intToID(0)));
+        out_msg.MessageSize := MessageSizeType:Control;
+        DPRINTF(bufferflag, "record out %llx\n", address);
+      }
+      
+      
   }
 
   action(uu_profileDataMiss, "\udm", desc="Profile the demand miss") {
@@ -1458,6 +1478,15 @@ MachineType:L0Cache, 1, 1, id));
 
   action(uu_profileDataHit, "\udh", desc="Profile the demand hit") {
       ++L1Dcache.demand_hits;
+      enqueue(recordToL2_out, RequestMsg, to_l2_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:GETS;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToRange(address, MachineType:L2Cache,
+        l2_select_low_bit, l2_select_num_bits, intToID(0)));
+        out_msg.MessageSize := MessageSizeType:Control;
+        DPRINTF(bufferflag, "record out %llx\n", address);
+      }
      // DPRINTF(bufferflag, "profile\n");
       
   }

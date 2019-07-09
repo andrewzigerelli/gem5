@@ -224,6 +224,7 @@ class CacheMemory : public SimObject
     int stall2[10000][2];
     int fre_rec[10000][3];
     Cycles access_record[2048][1000];
+    Addr   access_record_addr[2048][1000];
     int record_num[2048];
     //andrew
     //rct structure

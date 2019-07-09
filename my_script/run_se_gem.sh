@@ -15,6 +15,7 @@ function trapFun {
 trap trapFun EXIT
 
 # GEM STUFF
+GEM5_PATH=~/gemb/gem5
 BUILD=X86_MESI_Two_Level
 GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
 GDB_GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.debug
@@ -39,7 +40,7 @@ NUM_COUNTERS="5"
 RCT_CFG="--rct_size $RCT_SIZE --num_ctrs $NUM_COUNTERS"
 
 ####CACHE_CONFIG
-CORE_NUM="4"
+CORE_NUM="1"
 L1D_SIZE="32kB"
 L1I_SIZE="32kB"
 L1D_ASSOC="8"

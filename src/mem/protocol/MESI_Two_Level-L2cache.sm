@@ -59,6 +59,11 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
 
   MessageBuffer * responseToL2Cache, network="From", virtual_network="1",
     vnet_type="response";  // a local L1 || Memory -> this L2 bank
+
+  //yanan
+  MessageBuffer * recordFromL1, network="From", virtual_network="7",
+    vnet_type="request";
+
 {
   // STATES
   state_declaration(State, desc="L2 Cache states", default="L2Cache_State_NP") {
@@ -303,6 +308,28 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   //yanan
   out_port(stallRequest_out, RequestMsg, stallRequestFromL2Cache);
   out_port(resetRequest_out, RequestMsg, resetRequestFromL2Cache);
+
+  //yanan
+  in_port(recordFromL1_in, RequestMsg, recordFromL1, rank = 7) {
+    if(recordFromL1_in.isReady(clockEdge())) {
+        peek(recordFromL1_in, RequestMsg) {
+            Tick a := clockEdge();
+            Cycles b := ticksToCycles(a);
+            L2cache.accessRecord(in_msg.addr, b);
+           } 
+            recordFromL1_in.dequeue(clockEdge());
+
+        
+    }
+  }
+
+
+
+
+
+
+
+
 
   in_port(L1unblockNetwork_in, ResponseMsg, unblockToL2Cache, rank = 2) {
     if(L1unblockNetwork_in.isReady(clockEdge())) {
