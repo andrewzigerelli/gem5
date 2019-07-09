@@ -101,6 +101,7 @@ structure(ResponseMsg, desc="...", interface="Message") {
   
   //yanan
   bool CacheMiss, default="false", desc="tell L1 whether it's a L2 hit or misss";
+  bool StallFlag, default="false", desc="...";
   bool functionalRead(Packet *pkt) {
     // Valid data block is only present in message with following types
     if (Type == CoherenceResponseType:DATA ||

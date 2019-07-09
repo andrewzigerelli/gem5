@@ -158,6 +158,14 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l1_cntrl.missToBuff.master = ruby_system.network.slave
         l1_cntrl.resetRequestFromL2 = MessageBuffer()
         l1_cntrl.resetRequestFromL2.slave = ruby_system.network.master
+        l1_cntrl.recordToL2 = MessageBuffer()
+        l1_cntrl.recordToL2.master = ruby_system.network.slave
+        l1_cntrl.freToL2 = MessageBuffer()
+        l1_cntrl.freToL2.master = ruby_system.network.slave
+        l1_cntrl.recordFromL2 = MessageBuffer()
+        l1_cntrl.recordFromL2.slave = ruby_system.network.slave
+
+
 
 
         l1_cntrl.responseFromL1Cache = MessageBuffer()
@@ -250,6 +258,14 @@ def create_system(options, full_system, system, dma_ports, bootmem,
         l2_cntrl.stallRequestFromL2Cache.master = ruby_system.network.slave
         l2_cntrl.resetRequestFromL2Cache = MessageBuffer()
         l2_cntrl.resetRequestFromL2Cache.master = ruby_system.network.slave
+        l2_cntrl.recordFromL1 = MessageBuffer()
+        l2_cntrl.recordFromL1.slave = ruby_system.network.master
+        l2_cntrl.freFromL1 = MessageBuffer()
+        l2_cntrl.freFromL1.slave = ruby_system.network.master
+        l2_cntrl.recordToL1 = MessageBuffer()
+        l2_cntrl.recordToL1.master = ruby_system.network.slave
+
+
 
     # Run each of the ruby memory controllers at a ratio of the frequency of
     # the ruby system
@@ -318,6 +334,6 @@ def create_system(options, full_system, system, dma_ports, bootmem,
 
         all_cntrls = all_cntrls + [io_controller]
     ####yanan
-    ruby_system.network.number_of_virtual_networks = 7
+    ruby_system.network.number_of_virtual_networks = 9
     topology = create_topology(all_cntrls, options)
     return (cpu_sequencers, mem_dir_cntrl_nodes, topology)

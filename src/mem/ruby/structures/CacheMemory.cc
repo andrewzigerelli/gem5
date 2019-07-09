@@ -102,6 +102,11 @@ CacheMemory::init()
         for (int j  = 0; j < 1000; j++)
             access_record[i][j]=Cycles(0);
     }
+    for (int i = 0; i<2048; i++)
+    {
+        for (int j  = 0; j < 1000; j++)
+            access_record_addr[i][j]=0;
+    }
     for (int i = 0; i<2048; i++) record_num[i] = 0;
     for (int i=0; i<10000; i++)
     {
@@ -226,13 +231,26 @@ CacheMemory::resetSetFlag(Addr address, int id)
 void
 CacheMemory::accessRecord(Addr address, Cycles time)
 {
+
     int set = addressToCacheSet(address);
-    if (record_num[set] > 10)
+    //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
     int i;
     int j;
+
+    //if (record_num[set] > 10)
+        DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
+
     for (i = 0; i < record_num[set]; i++)
     {
-        if ((time - access_record[set][i]) < Cycles(10000))
+        if (access_record_addr[set][i] == address)
+            break;
+    }
+    if (i != record_num[set])
+        return;
+
+    for (i = 0; i < record_num[set]; i++)
+    {
+        if ((time - access_record[set][i]) < Cycles(1000))
         {
             //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
             break;
@@ -241,12 +259,23 @@ CacheMemory::accessRecord(Addr address, Cycles time)
     for (j = 0; j < (record_num[set] - i); j++)
     {
         access_record[set][j] = access_record[set][j + i];
+        access_record_addr[set][j] = access_record_addr[set][j + i];
     }
     record_num[set] = record_num[set] - i + 1;
     access_record[set][record_num[set] - 1] = time;
+    access_record_addr[set][record_num[set] - 1] = address;
 
 }
 
+//yanan
+bool
+CacheMemory::checkStall(Addr address)
+{
+    int set = addressToCacheSet(address);
+    if (record_num[set] > 10)
+        return true;
+    return false;
+}
 
 void CacheMemory::fre_record(Addr address, int id, Cycles cycle)
 {

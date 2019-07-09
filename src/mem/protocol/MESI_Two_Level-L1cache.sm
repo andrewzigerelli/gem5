@@ -70,6 +70,20 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
    MessageBuffer * resetRequestFromL2, network="From", virtual_network="5",
         vnet_type="request";
 
+   //yanan for recording frequency
+   MessageBuffer * recordToL2, network="To", virtual_network="7",
+        vnet_type="request";
+   
+   //yanan asking for frequency record
+   MessageBuffer * freToL2, network="To", virtual_network="8",
+        vnet_type="request";
+
+   //yanan asking for frequency record
+   MessageBuffer * recordFromL2, network="From", virtual_network="6",
+        vnet_type="response";
+   
+   
+
 
    // To this node's L1 cache FROM the network
    // a L2 bank -> this L1
@@ -125,6 +139,9 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     SB_SS, AccessPermission:Read_Only, desc="when the data is in rct buffer";
     SB_EE, AccessPermission:Read_Only, desc="when the data is in rct buffer";
     SB_MM, AccessPermission:Read_Only, desc="when the data is in rct buffer";
+    WW_S, AccessPermission:Read_Only, desc="...";
+    WW_M, AccessPermission:Read_Only, desc="...";
+    WW_E, AccessPermission:Read_Only, desc="...";
 
   }
 
@@ -170,6 +187,10 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
     PF_Store,   desc="exclusive load request from prefetcher";
     //yanan
     CALL_BACK,  desc="triggered when the is back from rct buffer";
+    Wait_Fre,   desc="...";
+    Fre_Back,   desc="...";
+    Fre_BackS,  desc="...";
+
   }
 
   // TYPES
@@ -386,6 +407,8 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
   out_port(delayhToBuff_out, RequestMsg, delayhToBuff);
   out_port(delaymToBuff_out, RequestMsg, delaymToBuff);
   out_port(missToBuff_out, RequestMsg, missToBuff);
+  out_port(recordToL2_out, RequestMsg, recordToL2);
+  out_port(freToL2_out, RequestMsg, freToL2);
 
   // Prefetch queue between the controller and the prefetcher
   // As per Spracklen et al. (HPCA 2005), the prefetch queue should be
@@ -427,6 +450,26 @@ machine(MachineType:L1Cache, "MESI Directory L1 Cache CMP")
         resetRequest_in.dequeue(clockEdge());
       }
     }  
+
+    //yanan
+    in_port(recordFromL2_in, ResponseMsg, recordFromL2, desc="...") {
+      if(recordFromL2_in.isReady(clockEdge())) {
+        peek(recordFromL2_in, ResponseMsg, block_on="addr") {
+          Entry L1cache_entry := getCacheEntry(in_msg.addr);
+            if(in_msg.StallFlag) {
+                trigger(Event:Fre_Back, in_msg.addr, L1cache_entry,
+                    TBEs[in_msg.addr]);
+            }else {
+                trigger(Event:Fre_BackS, in_msg.addr, L1cache_entry,
+                    TBEs[in_msg.addr]);}
+        }
+      }
+    }
+
+
+
+
+
 
  
     in_port(optionalQueue_in, RubyRequest, optionalQueue, desc="...", rank = 3) {
@@ -637,19 +680,24 @@ in_msg.addr));
                     L1Icache_entry.CacheState);
             DPRINTF(bufferflag, "1\n");
 
-            if(L1Icache.checkFlag(in_msg.LineAddress) && (
-                getState_S(L1Icache_entry, in_msg.LineAddress) == State:E ||
-                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_EE ||
-                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:M ||
-                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_MM ||
-                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:S ||
-                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_SS)){
-                DPRINTF(bufferflag, "icache stall\n");
-                 trigger(mandatory_request_type_to_event_S(in_msg.Type), in_msg.  
-                           LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);}
-                 else{
+
+            if(getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_EE ||
+               getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_MM ||
+               getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_SS){
+                trigger(mandatory_request_type_to_event_S(in_msg.Type),
+                  in_msg.LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);
+            }
+            
+            if(getState_S(L1Icache_entry, in_msg.LineAddress) == State:E ||
+               getState_S(L1Icache_entry, in_msg.LineAddress) == State:M ||
+               getState_S(L1Icache_entry, in_msg.LineAddress) == State:S){
+                trigger(Event:Wait_Fre, in_msg.LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);
+            }
+
+            else{
                 trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.  
                       LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);}
+
           }else{
             // Check to see if it is in the OTHER L1
             Entry L1Dcache_entry := getL1DCacheEntry(in_msg.LineAddress);
@@ -687,17 +735,28 @@ in_msg.addr));
              DPRINTF(bufferflag, "state in manda %s\n",
                     L1Dcache_entry.CacheState);
              DPRINTF(bufferflag, "5\n");
+            if((in_msg.Type == RubyRequestType:ST) || 
+               (in_msg.Type == RubyRequestType:ATOMIC)) {
+                trigger(Event:Store, in_msg.LineAddress, L1Dcache_entry,
+                    TBEs[in_msg.LineAddress]);
+            }
 
-            if(L1Dcache.checkFlag(in_msg.LineAddress) && (
-                getState_S(L1Dcache_entry, in_msg.LineAddress) == State:E ||
-                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_EE ||
-                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:M ||
-                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_MM ||
-                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:S ||
-                 getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_SS)){
-                DPRINTF(bufferflag, "dcache stall\n");
-                 trigger(mandatory_request_type_to_event_S(in_msg.Type), in_msg.
-                        LineAddress, L1Dcache_entry, TBEs[in_msg.LineAddress]);}
+            
+            if(getState_S(L1Dcache_entry, in_msg.LineAddress) == State:E ||
+               getState_S(L1Dcache_entry, in_msg.LineAddress) == State:M ||
+               getState_S(L1Dcache_entry, in_msg.LineAddress) == State:S) {
+               trigger(Event:Wait_Fre, in_msg.LineAddress, L1Dcache_entry,
+                    TBEs[in_msg.LineAddress]);
+            }
+
+
+            if(getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_EE ||
+               getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_SS ||
+               getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_MM) {
+               trigger(mandatory_request_type_to_event_S(in_msg.Type), 
+                in_msg.LineAddress, L1Dcache_entry, TBEs[in_msg.LineAddress]);
+            }
+
             else {
             trigger(mandatory_request_type_to_event(in_msg.Type), in_msg.LineAddress,
                     L1Dcache_entry, TBEs[in_msg.LineAddress]);}
@@ -1235,6 +1294,11 @@ MachineType:L0Cache, 1, 1, id));
   }
 
 
+//yanan
+  action(y_popRecordQueue, "bpR", desc="pop the buffer reponse queue") {
+    recordFromL2_in.dequeue(clockEdge());
+  }
+
   action(h_load_hit, "hd",
          desc="Notify sequencer the load completed.")
   {
@@ -1448,7 +1512,25 @@ MachineType:L0Cache, 1, 1, id));
       ++L1Icache.demand_misses;
   }
 
-  action(uu_profileInstHit, "\uih", desc="Profile the demand hit") {
+  action(uuu_profileInstHit, "\uuih", desc="Profile the demand hit") {
+      ++L1Icache.demand_hits;
+      enqueue(recordToL2_out, RequestMsg, to_l2_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:GETS;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToRange(address, MachineType:L2Cache,
+        l2_select_low_bit, l2_select_num_bits, intToID(0)));
+        out_msg.MessageSize := MessageSizeType:Control;
+      }
+
+  }
+
+  action(uu_profileDataHit, "\udH", desc="Profile the demand hit") {
+      ++L1Dcache.demand_hits;
+  }
+
+
+  action(uu_profileInstHit, "\uiH", desc="Profile the demand hit") {
       ++L1Icache.demand_hits;
   }
 
@@ -1456,9 +1538,16 @@ MachineType:L0Cache, 1, 1, id));
       ++L1Dcache.demand_misses;
   }
 
-  action(uu_profileDataHit, "\udh", desc="Profile the demand hit") {
+  action(uuu_profileDataHit, "\uudh", desc="Profile the demand hit") {
       ++L1Dcache.demand_hits;
-     // DPRINTF(bufferflag, "profile\n");
+      enqueue(recordToL2_out, RequestMsg, to_l2_latency) {
+        out_msg.addr := address;
+        out_msg.Type := CoherenceRequestType:GETS;
+        out_msg.Requestor := machineID;
+        out_msg.Destination.add(mapAddressToRange(address, MachineType:L2Cache,
+        l2_select_low_bit, l2_select_num_bits, intToID(0)));
+        out_msg.MessageSize := MessageSizeType:Control;
+      }
       
   }
 
@@ -1654,6 +1743,69 @@ MachineType:L0Cache, 1, 1, id));
     uu_profileDataHit;
     po_observeHit;
     k_popMandatoryQueue;
+  }
+
+//yanan
+  transition(S, Wait_Fre, WW_S)
+  {
+    uuu_profileDataHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(M, Wait_Fre, WW_M)
+  {
+    uuu_profileDataHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(E, Wait_Fre, WW_E)
+  {
+    uuu_profileDataHit;
+    k_popMandatoryQueue;
+  }
+
+  transition(WW_E, Fre_BackS, SB_EE ) {
+    sendrequesth;
+    sendbuffer_h;
+    uu_profileDataHit;
+    //po_observeHit;
+    y_popRecordQueue;
+  }
+
+  transition(WW_E, Fre_Back, E){
+    sendrequesth;
+    h_load_hit;
+    sendbuffer_h_n;
+    y_popRecordQueue;
+  }
+
+  transition(WW_S, Fre_BackS, SB_SS ) {
+    sendrequesth;
+    sendbuffer_h;
+    uu_profileDataHit;
+    //po_observeHit;
+    y_popRecordQueue;
+  }
+
+  transition(WW_S, Fre_Back, S){
+    sendrequesth;
+    h_load_hit;
+    sendbuffer_h_n;
+  }
+
+
+  transition(WW_M, Fre_BackS, SB_MM ) {
+    sendrequesth;
+    sendbuffer_h;
+    uu_profileDataHit;
+    //po_observeHit;
+    y_popRecordQueue;
+  }
+
+  transition(WW_M, Fre_Back, M){
+    sendrequesth;
+    h_load_hit;
+    sendbuffer_h_n;
   }
 
   transition(SB_SS, Load, SB_SS) {
