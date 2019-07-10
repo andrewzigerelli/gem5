@@ -28,7 +28,7 @@
 
 machine(MachineType:L0Cache, "MESI Directory L0 Cache CMP")
  : CacheMemory * L0cache; /* RCT stuff */
-   Cycles random_latency := 0;
+   Cycles random_latency := 150;
    Cycles issue_time := 0;
 
    // Message Queues
@@ -279,15 +279,16 @@ TBEs[in_msg.addr]);}
   //andrew
   action(delaySendBack, "dsb", desc="...") {
     DPRINTF(RCT, "addr L0 %llu\n", address);
-    Tick a := clockEdge();
-    Cycles b := ticksToCycles(a);
-    DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
-    DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
+    //Tick a := clockEdge();
+    //Cycles b := ticksToCycles(a);
+    //DPRINTF(bufferflag, "addr L0 cycles, %llx, %d\n", address, b);
+    //DPRINTF(stallflag, "addr L0 cycles, %llx, %d\n", address, b);
     peek(delay_in, RequestMsg) {
        DPRINTF(yyflag, "addr in hit %llx\n", in_msg.addr);
        /* get random latency */
        issue_time := L0cache.getIssueTime(address);
-       random_latency := L0cache.validSampleHistogram(issue_time, curCycle());
+       //random_latency := L0cache.validSampleHistogram(issue_time, curCycle());
+       DPRINTF(bufferflag, "aaaaa%d\n", random_latency);
        enqueue(responseFromBuff, ResponseMsg, random_latency) {
         out_msg.addr := address;
         out_msg.Type := CoherenceResponseType: DATA;

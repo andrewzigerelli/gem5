@@ -37,11 +37,13 @@ RCTBuffer::insert(Addr address, Cycles ret_cycle) {
     }
     else {
         loc->second.insert(ret_cycle);
+        /*
         if (DTRACE(RCT)) {
             for (Cycles const& cycle: loc->second) {
                 DPRINTFR(RCT, "cycle %llu\n", cycle);
             }
         }
+        */
         DPRINTFR(RCT, "number of counters is %d\n", ctrs);
     }
     DPRINTFR(RCT, "RCT buffer size is %d\n", rct_buffer.size());
@@ -216,16 +218,19 @@ RCTBuffer::validSampleHistogram(Cycles issue_time, Cycles cur_cycle) {
     DPRINTF(RCT, " sample issue_time %d\n", issue_time);
     DPRINTF(RCT, "sample cur_cycle %d\n", cur_cycle);
     int i=0;
+
     do {
         DPRINTFR(RCTTrace, "inside validSample: %d\n", i++);
         random_latency = sampleHistogram();
         return_time = issue_time + random_latency;
+    /*
         if (i > 10) {
             DPRINTFR(RCTTrace, "issue time : %llu\n", issue_time);
             DPRINTFR(RCTTrace, "latency  : %llu\n", random_latency);
             DPRINTFR(RCTTrace, "return time: %llu\n", return_time);
             DPRINTFR(RCTTrace, "cur time: %llu\n", cur_cycle);
         }
+        */
     } while ( return_time <= cur_cycle );
     return random_latency;
 }
