@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+GEM5_PATH=~/gemb/gem5
 cd $GEM5_PATH/my_script;
 BUILD_STRING=$(grep -E "^BUILD=" run_gem.sh)
 #extract just the ISA

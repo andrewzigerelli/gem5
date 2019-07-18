@@ -315,18 +315,30 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
         peek(recordFromL1_in, RequestMsg) {
             Tick a := clockEdge();
             Cycles b := ticksToCycles(a);
-            L2cache.accessRecord(in_msg.addr, b);
-           } 
+            bool flag := L2cache.accessRecord(in_msg.addr, b,
+                    IDToInt(machineIDToNodeID(in_msg.Requestor)));
+      if (flag || L2cache.checkStallingFlag(in_msg.addr)) {
+        enqueue(stallRequest_out, RequestMsg, to_l1_latency) {
+            out_msg.addr := in_msg.addr;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+         }
+      } else if (L2cache.checkReset(in_msg.addr)) {
+        enqueue(resetRequest_out, RequestMsg) {
+            out_msg.addr := in_msg.addr;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+        }
+      }
+      }
+           
             recordFromL1_in.dequeue(clockEdge());
 
         
     }
   }
-
-
-
-
-
 
 
 
@@ -762,28 +774,6 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   }
 
   action(rr_deallocateL2CacheBlock, "\r", desc="Deallocate L2 cache block.  Sets the cache to not present, allowing a replacement in parallel with a fetch.") {
-    //yanan
-    bool c_flag := L2cache.changeSetFlag(address, cache_entry.sharer0, cache_entry.sharer1);
-    if(c_flag) {
-        if(L2cache.resetSetFlag(address, 0)){
-           enqueue(resetRequest_out, RequestMsg){
-             out_msg.addr := address;
-            out_msg.Requestor := machineID;
-            out_msg.Destination.add(mapAddressToRange(address,
-                    MachineType:L1Cache, 2, 2, intToID(0)));
-            out_msg.MessageSize := MessageSizeType:Control;
-           }
-         }
-        if(L2cache.resetSetFlag(address, 1)){
-           enqueue(resetRequest_out, RequestMsg){
-             out_msg.addr := address;
-            out_msg.Requestor := machineID;
-            out_msg.Destination.add(mapAddressToRange(address,
-                    MachineType:L1Cache, 2, 2, intToID(1)));
-            out_msg.MessageSize := MessageSizeType:Control;
-           }
-        }
-     }
     L2cache.deallocate(address);
     unset_cache_entry();
   }
@@ -819,14 +809,50 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       ++L2cache.demand_misses;
       Tick a := clockEdge();
       Cycles b := ticksToCycles(a);
-      L2cache.accessRecord(address, b);
+      peek(L1RequestL2Network_in, RequestMsg) {
+      bool flag := L2cache.accessRecord(address, b, IDToInt(machineIDToNodeID(machineID)));
+      if (flag || L2cache.checkStallingFlag(address)) {
+        enqueue(stallRequest_out, RequestMsg, to_l1_latency) {
+            out_msg.addr := address;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+         }
+      } else if (L2cache.checkReset(address)) {
+        enqueue(resetRequest_out, RequestMsg) {
+            out_msg.addr := address;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+        }
+      }
+
+      }
+
   }
 
   action(uu_profileHit, "\uh", desc="Profile the demand hit") {
       ++L2cache.demand_hits;
       Tick a := clockEdge();
       Cycles b := ticksToCycles(a);
-      L2cache.accessRecord(address, b);
+      peek(L1RequestL2Network_in, RequestMsg) {
+      bool flag := L2cache.accessRecord(address, b, IDToInt(machineIDToNodeID(machineID)));
+      if (flag || L2cache.checkStallingFlag(address)) {
+        enqueue(stallRequest_out, RequestMsg, to_l1_latency) {
+            out_msg.addr := address;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+         }
+      } else if (L2cache.checkReset(address)) {
+        enqueue(resetRequest_out, RequestMsg) {
+            out_msg.addr := address;
+            out_msg.Requestor := machineID;
+            out_msg.Destination.add(in_msg.Requestor);
+            out_msg.MessageSize := MessageSizeType:Control;
+        }
+      }
+      }
   }
 
   action(nn_addSharer, "\n", desc="Add L1 sharer to list") {
@@ -981,7 +1007,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     a_issueFetchToMemory;
     uu_profileMiss;
     //yanan
-    Flag_Set;
+    //Flag_Set;
     jj_popL1RequestQueue;
   }
 
@@ -997,7 +1023,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     a_issueFetchToMemory;
     uu_profileMiss;
      //yanan     
-     Flag_Set;
+     //Flag_Set;
     jj_popL1RequestQueue;
   }
 
@@ -1010,7 +1036,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
     a_issueFetchToMemory;
     uu_profileMiss;
     //yanan
-    Flag_Set;
+    //Flag_Set;
     jj_popL1RequestQueue;
   }
 

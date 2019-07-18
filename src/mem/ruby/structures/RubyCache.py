@@ -47,6 +47,7 @@ class RubyCache(SimObject):
     start_index_bit_2 = Param.Int(6, "ddddd");
     size_2 = Param.MemorySize("capacity in bytes");
     assoc_2 = Param.Int("");
+    threshold = Param.Int("");
 
     dataArrayBanks = Param.Int(1, "Number of banks for the data array")
     tagArrayBanks = Param.Int(1, "Number of banks for the tag array")
