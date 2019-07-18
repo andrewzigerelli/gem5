@@ -46,7 +46,7 @@ L3_ASSOC="8"
 USE_RUBY="TRUE" #SET TO TRUE TO USE RUBY
 
 #MAXINSTS=10000000000
-MAXINSTS=500000000
+MAXINSTS=1000000000
 
 #### DISK_IMAGE FOLLOW BY root=option since each 
 #### image has a different root partition
@@ -113,7 +113,16 @@ if [ "$1" = "--fs-options" ]; then
 fi
 
 #OUT_DIR="./"output"/"$DISK_IMAGE"/"$KERNEL"/L2_size_"$L2_SIZE
-OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+# get git branch name
+BRANCH_NAME=$(git --git-dir=$GEM5_PATH/.git --work-tree=$GEM5_PATH symbolic-ref HEAD --short)
+
+if [ -z "$ZFS_HOME" ]
+then
+    OUT_DIR=$GEM5_PATH"/"my_script"/"output"/"$BRANCH_NAME"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+else
+    OUT_DIR=$ZFS_HOME/output"/"$BRANCH_NAME"/"$BUILD"/"$CORE_NUM"_core/"$DISK_IMAGE"/"$KERNEL
+fi
+
 
 #### setup checkpointing
 # setup readfile for initial checkpoint
@@ -166,7 +175,7 @@ BENCH_OUT_DIR=$OUT_DIR/$BENCHMARK/
 BENCH_DEBUG_FLAG=testflag1
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "--debug-file=$BENCH_DEBUG_FILE" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
 ##FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
