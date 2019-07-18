@@ -6,9 +6,9 @@
 # ARE SET AS ENVIRONMENT VARIABLES!!!
 ###################################################
 
-
+GEM5_PATH=~/gemb/gem5/
 BUILD=X86_MESI_Two_Level
-GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.opt
+GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.fast
 GDB_GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.debug
 ######## IF YOU CHANGE THIS, MAKE SURE TO RECHECKPOINT!!!
 #BENCH_GEM_CMD=$GEM5_PATH/build/X86_MOESI_AMD_Base/gem5.opt
@@ -31,7 +31,7 @@ NUM_COUNTERS="5"
 RCT_CFG="--rct_size $RCT_SIZE --num_ctrs $NUM_COUNTERS"
 
 ####CACHE_CONFIG
-CORE_NUM="4"
+CORE_NUM="1"
 L1D_SIZE="32kB"
 L1I_SIZE="32kB"
 L1D_ASSOC="8"
@@ -177,7 +177,7 @@ BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "--debug-file=$BENCH_DEBUG_FILE" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
-##FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
+FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 
 #FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_OPTIONS" "--command-line" '"$CMD_LINE" root="$ROOT"'"
 

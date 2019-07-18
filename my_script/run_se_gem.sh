@@ -40,7 +40,7 @@ NUM_COUNTERS="5"
 RCT_CFG="--rct_size $RCT_SIZE --num_ctrs $NUM_COUNTERS"
 
 ####CACHE_CONFIG
-CORE_NUM="1"
+CORE_NUM="4"
 L1D_SIZE="32kB"
 L1I_SIZE="32kB"
 L1D_ASSOC="8"
@@ -189,7 +189,7 @@ BENCH_DEBUG_FLAG=testflag1
 BENCH_DEBUG_FILE=my_trace.out.gz
 #buid full cmd, potentially unsafe if you screw up the builder variables
 FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_CFG
-FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_CFG
+##FULL_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "--debug-flags=$BENCH_DEBUG_FLAG" "$CFG" "$BENCH_CFG
 
 
 DEBUG_CMD=$GEM_CMD" "--outdir=$BENCH_OUT_DIR" "$CFG" "$BENCH_CFG" "--command-line" '"$CMD_LINE" root="$ROOT"'"

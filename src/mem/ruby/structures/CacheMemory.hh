@@ -119,7 +119,7 @@ class CacheMemory : public SimObject
     bool resetSetFlag(Addr address, int id);
     void resetSetFlag_2(Addr address);
     void fre_record(Addr address, int id, Cycles cycle);
-    void accessRecord(Addr address, Cycles time);
+    bool accessRecord(Addr address, Cycles time, int ID);
     // Functions for locking and unlocking cache lines corresponding to the
     // provided address.  These are required for supporting atomic memory
     // accesses.  These are to be used when only the address of the cache entry
@@ -128,6 +128,9 @@ class CacheMemory : public SimObject
     void setLocked (Addr addr, int context);
     void clearLocked (Addr addr);
     bool isLocked (Addr addr, int context);
+    bool checkStallingFlag(Addr address);
+    bool checkReset(Addr address);
+
 
     // Print cache contents
     void print(std::ostream& out) const;
@@ -181,6 +184,7 @@ class CacheMemory : public SimObject
     int64_t addressToCacheSet(Addr address) const;
     //yanan
     int64_t addressToCacheSet_2(Addr address) const;
+    int64_t addressToCacheSet_22(Addr address) const;
     // Given a cache tag: returns the index of the tag in a set.
     // returns -1 if the tag is not found.
     int findTagInSet(int64_t line, Addr tag) const;
@@ -217,6 +221,7 @@ class CacheMemory : public SimObject
     int m_start_index_bit_2;
     int m_cache_num_sets_2;
     int m_cache_num_set_bits_2;
+    int m_threshold;
     //yanan stall flag
 
     int flag[10000][2];
@@ -226,6 +231,7 @@ class CacheMemory : public SimObject
     Cycles access_record[2048][1000];
     Addr   access_record_addr[2048][1000];
     int record_num[2048];
+    int Stall_Flagn[2048];
     //andrew
     //rct structure
     RCTBuffer rct_buffer;

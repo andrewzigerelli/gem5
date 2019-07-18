@@ -80,6 +80,8 @@ CacheMemory::CacheMemory(const Params *p)
     m_is_instruction_only_cache = p->is_icache;
     m_resource_stalls = p->resourceStalls;
     m_block_size = p->block_size;  // may be 0 at this point. Updated in init()
+    //yanan
+    m_threshold = p-> threshold;
 }
 
 void
@@ -97,6 +99,7 @@ CacheMemory::init()
     assert(m_cache_num_set_bits > 0);
     //yanan
     for (int i = 0; i<10000; i++) stall_flag[i]=0;
+    for (int i = 0; i<2048; i++) Stall_Flagn[i]=0;
     for (int i = 0; i<2048; i++)
     {
         for (int j  = 0; j < 1000; j++)
@@ -121,6 +124,7 @@ CacheMemory::init()
     for (int i = 0; i<10000; i++)
         for (int j = 0; j<3; j++)
             fre_rec[i][j] = 0;
+    DPRINTF(testflag1, "threshold %d\n", m_threshold);
     m_cache.resize(m_cache_num_sets,
                     std::vector<AbstractCacheEntry*>(m_cache_assoc, nullptr));
 }
@@ -152,10 +156,21 @@ CacheMemory::addressToCacheSet_2(Addr address) const
                      m_start_index_bit_2 + m_cache_num_set_bits_2 - 1);
 }
 
+int64_t
+CacheMemory::addressToCacheSet_22(Addr address) const
+{
+    int set = bitSelect(address, m_start_index_bit_2, m_start_index_bit_2
+            + m_cache_num_set_bits_2 - 1);
+    int index = bitSelect(address, m_start_index_bit_2 - 2,
+            m_start_index_bit_2 -2 + 2 -1);
+
+    return (set + index * 2048);
+
+}
 void
 CacheMemory::setSetFlag_2(Addr address)
 {
-    int64_t CacheSet = addressToCacheSet_2(address);
+    int64_t CacheSet = addressToCacheSet_22(address);
     stall_flag[CacheSet] = 1;
     DPRINTF(stallflag, "set in l1 %d\n", CacheSet);
 }
@@ -164,7 +179,7 @@ CacheMemory::setSetFlag_2(Addr address)
 void
 CacheMemory::resetSetFlag_2(Addr address)
 {
-    int64_t CacheSet = addressToCacheSet_2(address);
+    int64_t CacheSet = addressToCacheSet_22(address);
     stall_flag[CacheSet] = 0;
     DPRINTF(stallflag, "recover set in l1 %d\n", CacheSet);
 }
@@ -172,7 +187,8 @@ CacheMemory::resetSetFlag_2(Addr address)
 
 bool CacheMemory::checkFlag(Addr address)
 {
-    int64_t CacheSet = addressToCacheSet_2(address);
+    int64_t CacheSet = addressToCacheSet_22(address);
+    //DPRINTF(testflag1, "set %d address %llx\n", CacheSet, address);
     if (stall_flag[CacheSet] == 1)
         return true;
     return false;
@@ -230,29 +246,41 @@ CacheMemory::resetSetFlag(Addr address, int id)
 }
 
 //yanan
-void
-CacheMemory::accessRecord(Addr address, Cycles time)
+bool
+CacheMemory::accessRecord(Addr address, Cycles time, int ID)
 {
    int set = addressToCacheSet(address);
     //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
     //DPRINTF(testflag1, "income addr %llx\n", address);
     int i;
     int j;
-
-    if (record_num[set] > 5)
-        DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
+    //DPRINTF(testflag1, "set %d %d\n", set, set+ID*2048);
+    //if (record_num[set] > 5)
+    //    DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
 
     for (i = 0; i < record_num[set]; i++)
     {
         if (access_record_addr[set][i] == address)
             break;
     }
+
     if (i != record_num[set])
-        return;
+    {
+
+        //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
+        if (record_num[set] > m_threshold)
+        {
+            Stall_Flagn[set] = 1;
+            return true;
+        }
+
+        return false;
+    }
+
 
     for (i = 0; i < record_num[set]; i++)
     {
-        if ((time - access_record[set][i]) < Cycles(1000))
+        if ((time - access_record[set][i]) < Cycles(10000))
         {
             //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
             break;
@@ -266,6 +294,39 @@ CacheMemory::accessRecord(Addr address, Cycles time)
     record_num[set] = record_num[set] - i + 1;
     access_record[set][record_num[set] - 1] = time;
     access_record_addr[set][record_num[set] - 1] = address;
+
+    //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
+    if (record_num[set] > m_threshold)
+    {
+        Stall_Flagn[set] = 1;
+        return true;
+    }
+    return false;
+}
+
+bool
+CacheMemory::checkStallingFlag(Addr address)
+{
+    int set = addressToCacheSet(address);
+    if (Stall_Flagn[set] == 1)
+        return true;
+    return false;
+
+
+}
+
+
+bool
+CacheMemory::checkReset(Addr address)
+{
+    int set = addressToCacheSet(address);
+    if ((record_num[set] < 1) && (Stall_Flagn[set] == 1))
+    {
+        Stall_Flagn[set] = 0;
+        return true;
+    }
+    return false;
+
 
 }
 

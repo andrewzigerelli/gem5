@@ -78,6 +78,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
     ## i.e. same parameters for each cache's rct buffer
     rct_size = options.rct_size
     rct_num_ctrs = options.num_ctrs
+    ##yanan
+    threshold = options.threshold
     for i in xrange(options.num_cpus):
         #
         # First create the Ruby objects associated with this cpu
@@ -91,7 +93,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                             size_2 = options.l2_size,
                             assoc_2 = options.l2_assoc,
                             rct_size = rct_size,
-                            num_ctrs = rct_num_ctrs)
+                            num_ctrs = rct_num_ctrs,
+                            threshold = threshold)
         l1d_cache = L1Cache(size = options.l1d_size,
                             assoc = options.l1d_assoc,
                             start_index_bit = block_size_bits,
@@ -100,7 +103,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                             size_2 = options.l2_size,
                             assoc_2 = options.l2_assoc,
                             rct_size = rct_size,
-                            num_ctrs = rct_num_ctrs)
+                            num_ctrs = rct_num_ctrs,
+                            threshold = threshold)
 
         prefetcher = RubyPrefetcher.Prefetcher()
 
@@ -185,7 +189,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                            size_2 = options.l2_size,
                            assoc_2 = options.l2_assoc,
                            rct_size = rct_size,
-                           num_ctrs = rct_num_ctrs)
+                           num_ctrs = rct_num_ctrs,
+                           threshold = threshold)
 
         l0_cntrl = L0Cache_Controller(version = i,
                                       L0cache = l0_cache,
@@ -223,7 +228,8 @@ def create_system(options, full_system, system, dma_ports, bootmem,
                            size_2 = options.l2_size,
                            assoc_2 = options.l2_assoc,
                            rct_size = rct_size,
-                           num_ctrs = rct_num_ctrs)
+                           num_ctrs = rct_num_ctrs,
+                           threshold = threshold)
 
         l2_cntrl = L2Cache_Controller(version = i,
                                       L2cache = l2_cache,
