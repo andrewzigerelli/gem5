@@ -36,3 +36,6 @@ out
 readfiles
 se_readfiles
 *.patch
+my_script/*.out
+my_script/*.err
+my_script/*.log
