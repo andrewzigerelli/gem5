@@ -119,7 +119,7 @@ class CacheMemory : public SimObject
     bool resetSetFlag(Addr address, int id);
     void resetSetFlag_2(Addr address);
     void fre_record(Addr address, int id, Cycles cycle);
-    bool accessRecord(Addr address, Cycles time, int ID);
+    void accessRecord(Addr address, Cycles time);
     // Functions for locking and unlocking cache lines corresponding to the
     // provided address.  These are required for supporting atomic memory
     // accesses.  These are to be used when only the address of the cache entry

@@ -312,6 +312,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
   //yanan
   in_port(recordFromL1_in, RequestMsg, recordFromL1, rank = 7) {
     if(recordFromL1_in.isReady(clockEdge())) {
+      /*
         peek(recordFromL1_in, RequestMsg) {
             Tick a := clockEdge();
             Cycles b := ticksToCycles(a);
@@ -336,7 +337,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
            
             recordFromL1_in.dequeue(clockEdge());
 
-        
+        */
     }
   }
 
@@ -807,8 +808,10 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
 
   action(uu_profileMiss, "\um", desc="Profile the demand miss") {
       ++L2cache.demand_misses;
+      /*
       Tick a := clockEdge();
       Cycles b := ticksToCycles(a);
+      
       peek(L1RequestL2Network_in, RequestMsg) {
       bool flag := L2cache.accessRecord(address, b, IDToInt(machineIDToNodeID(machineID)));
       if (flag || L2cache.checkStallingFlag(address)) {
@@ -828,11 +831,13 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
       }
 
       }
+     */
 
   }
 
   action(uu_profileHit, "\uh", desc="Profile the demand hit") {
       ++L2cache.demand_hits;
+      /*
       Tick a := clockEdge();
       Cycles b := ticksToCycles(a);
       peek(L1RequestL2Network_in, RequestMsg) {
@@ -853,6 +858,7 @@ machine(MachineType:L2Cache, "MESI Directory L2 Cache CMP")
         }
       }
       }
+     */
   }
 
   action(nn_addSharer, "\n", desc="Add L1 sharer to list") {

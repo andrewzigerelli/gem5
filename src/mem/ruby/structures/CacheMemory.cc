@@ -124,7 +124,7 @@ CacheMemory::init()
     for (int i = 0; i<10000; i++)
         for (int j = 0; j<3; j++)
             fre_rec[i][j] = 0;
-    DPRINTF(testflag1, "threshold %d\n", m_threshold);
+    //DPRINTF(testflag1, "threshold %d\n", m_threshold);
     m_cache.resize(m_cache_num_sets,
                     std::vector<AbstractCacheEntry*>(m_cache_assoc, nullptr));
 }
@@ -187,9 +187,9 @@ CacheMemory::resetSetFlag_2(Addr address)
 
 bool CacheMemory::checkFlag(Addr address)
 {
-    int64_t CacheSet = addressToCacheSet_22(address);
+    int64_t CacheSet = addressToCacheSet_2(address);
     //DPRINTF(testflag1, "set %d address %llx\n", CacheSet, address);
-    if (stall_flag[CacheSet] == 1)
+    if (Stall_Flagn[CacheSet] == 1)
         return true;
     return false;
 }
@@ -246,10 +246,10 @@ CacheMemory::resetSetFlag(Addr address, int id)
 }
 
 //yanan
-bool
-CacheMemory::accessRecord(Addr address, Cycles time, int ID)
+void
+CacheMemory::accessRecord(Addr address, Cycles time)
 {
-   int set = addressToCacheSet(address);
+   int set = addressToCacheSet_2(address);
     //DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
     //DPRINTF(testflag1, "income addr %llx\n", address);
     int i;
@@ -271,10 +271,11 @@ CacheMemory::accessRecord(Addr address, Cycles time, int ID)
         if (record_num[set] > m_threshold)
         {
             Stall_Flagn[set] = 1;
-            return true;
+            return;
         }
 
-        return false;
+        Stall_Flagn[set] = 0;
+        return;
     }
 
 
@@ -299,9 +300,10 @@ CacheMemory::accessRecord(Addr address, Cycles time, int ID)
     if (record_num[set] > m_threshold)
     {
         Stall_Flagn[set] = 1;
-        return true;
+        return;
     }
-    return false;
+    Stall_Flagn[set] = 0;
+    return;
 }
 
 bool

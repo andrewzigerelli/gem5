@@ -219,7 +219,7 @@ structure (CacheMemory, external = "yes") {
   bool resetSetFlag(Addr, int);
   void resetSetFlag_2(Addr);
   void fre_record(Addr, NodeID, Cycles);
-  bool accessRecord(Addr, Cycles, int);
+  void accessRecord(Addr, Cycles);
   bool checkStallingFlag(Addr);
   bool checkReset(Addr);
 

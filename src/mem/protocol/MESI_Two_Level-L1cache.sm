@@ -628,6 +628,9 @@ in_msg.addr));
     if (mandatoryQueue_in.isReady(clockEdge())) {
       peek(mandatoryQueue_in, RubyRequest, block_on="LineAddress") {
         //yanan
+        Tick a := clockEdge();
+        Cycles b := ticksToCycles(a);
+        L1Dcache.accessRecord(in_msg.LineAddress, b);
         DPRINTF(bufferflag, "addr in manda %llx\n", in_msg.LineAddress);
         
         DPRINTF(bufferflag, "physical addr in manda %llx\n", in_msg.PhysicalAddress);
@@ -646,14 +649,14 @@ in_msg.addr));
                     L1Icache_entry.CacheState);
             DPRINTF(bufferflag, "1\n");
 
-            if(L1Icache.checkFlag(in_msg.LineAddress) && (
+            if(L1Dcache.checkFlag(in_msg.LineAddress) && (
                 getState_S(L1Icache_entry, in_msg.LineAddress) == State:E ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_EE ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:M ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_MM ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:S ||
                  getState_S(L1Icache_entry, in_msg.LineAddress) == State:SB_SS)){
-                DPRINTF(bufferflag, "icache stall\n");
+                DPRINTF(testflag1, "icache stall %s\n", L1Icache_entry.CacheState);
                  trigger(mandatory_request_type_to_event_S(in_msg.Type), in_msg.  
                            LineAddress, L1Icache_entry, TBEs[in_msg.LineAddress]);}
                  else{
@@ -705,6 +708,7 @@ in_msg.addr));
                  getState_S(L1Dcache_entry, in_msg.LineAddress) == State:S ||
                  getState_S(L1Dcache_entry, in_msg.LineAddress) == State:SB_SS)){
                 DPRINTF(bufferflag, "dcache stall\n");
+                DPRINTF(testflag1, "icache stall %s\n", L1Dcache_entry.CacheState);
                  trigger(mandatory_request_type_to_event_S(in_msg.Type), in_msg.
                         LineAddress, L1Dcache_entry, TBEs[in_msg.LineAddress]);}
             else {
@@ -1459,6 +1463,7 @@ MachineType:L0Cache, 1, 1, id));
 
   action(uu_profileInstHit, "\uih", desc="Profile the demand hit") {
       ++L1Icache.demand_hits;
+      /*
       enqueue(recordToL2_out, RequestMsg, to_l2_latency) {
         out_msg.addr := address;
         out_msg.Type := CoherenceRequestType:GETS;
@@ -1468,7 +1473,7 @@ MachineType:L0Cache, 1, 1, id));
         out_msg.MessageSize := MessageSizeType:Control;
         DPRINTF(bufferflag, "record out %llx\n", address);
       }
-      
+      */
       
   }
 
@@ -1478,6 +1483,7 @@ MachineType:L0Cache, 1, 1, id));
 
   action(uu_profileDataHit, "\udh", desc="Profile the demand hit") {
       ++L1Dcache.demand_hits;
+      /*
       enqueue(recordToL2_out, RequestMsg, to_l2_latency) {
         out_msg.addr := address;
         out_msg.Type := CoherenceRequestType:GETS;
@@ -1487,6 +1493,7 @@ MachineType:L0Cache, 1, 1, id));
         out_msg.MessageSize := MessageSizeType:Control;
         DPRINTF(bufferflag, "record out %llx\n", address);
       }
+      */
      // DPRINTF(bufferflag, "profile\n");
       
   }
