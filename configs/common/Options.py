@@ -316,7 +316,7 @@ def addCommonOptions(parser):
     parser.add_option("--rct_size", type="int", default="100")
     parser.add_option("--num_ctrs", type="int", default="10")
     ## yanan
-    parser.add_option("--threshold", type="int", default="5")
+    parser.add_option("--threshold", type="int", default="10000")
 
 def addSEOptions(parser):
     # Benchmark options
