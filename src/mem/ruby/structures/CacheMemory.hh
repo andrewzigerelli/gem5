@@ -222,6 +222,7 @@ class CacheMemory : public SimObject
     int m_cache_num_sets_2;
     int m_cache_num_set_bits_2;
     int m_threshold;
+    int record_num_max;
     //yanan stall flag
 
     int flag[10000][2];

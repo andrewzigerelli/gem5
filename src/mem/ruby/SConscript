@@ -48,6 +48,7 @@ DebugFlag('alphaflag')
 DebugFlag('infoflag')
 DebugFlag('fre_stats')
 DebugFlag('testflag1')
+DebugFlag('max_fre')
 
 #andrew RCT
 DebugFlag('RCTTrace')

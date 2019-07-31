@@ -38,6 +38,7 @@
 #include "debug/RubyStats.hh"
 #include "debug/fre_stats.hh" //yanan
 #include "debug/infoflag.hh"
+#include "debug/max_fre.hh"
 #include "debug/stallflag.hh"
 #include "debug/testflag1.hh"
 #include "mem/protocol/AccessPermission.hh"
@@ -80,6 +81,7 @@ CacheMemory::CacheMemory(const Params *p)
     m_is_instruction_only_cache = p->is_icache;
     m_resource_stalls = p->resourceStalls;
     m_block_size = p->block_size;  // may be 0 at this point. Updated in init()
+    record_num_max = 0;
     //yanan
     m_threshold = p-> threshold;
 }
@@ -257,6 +259,12 @@ CacheMemory::accessRecord(Addr address, Cycles time)
     //DPRINTF(testflag1, "set %d %d\n", set, set+ID*2048);
     //if (record_num[set] > 5)
     //    DPRINTF(testflag1, "set %d fre %d\n", set, record_num[set]);
+
+    if (record_num[set] > record_num_max)
+    {
+        record_num_max = record_num[set];
+        DPRINTFR(max_fre, "%d\n", record_num_max);
+    }
 
     for (i = 0; i < record_num[set]; i++)
     {
