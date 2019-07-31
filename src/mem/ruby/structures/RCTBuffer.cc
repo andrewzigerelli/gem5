@@ -217,18 +217,7 @@ RCTBuffer::validSampleHistogram(Cycles issue_time, Cycles cur_cycle) {
     Cycles return_time;
     DPRINTF(RCT, " sample issue_time %d\n", issue_time);
     DPRINTF(RCT, "sample cur_cycle %d\n", cur_cycle);
-    int i=0;
-    do {
-        DPRINTFR(RCTTrace, "inside validSample: %d\n", i++);
-        random_latency = sampleHistogram();
-        return_time = issue_time + random_latency;
-        if (i > 10) {
-            DPRINTFR(RCTTrace, "issue time : %llu\n", issue_time);
-            DPRINTFR(RCTTrace, "latency  : %llu\n", random_latency);
-            DPRINTFR(RCTTrace, "return time: %llu\n", return_time);
-            DPRINTFR(RCTTrace, "cur time: %llu\n", cur_cycle);
-        }
-    } while ( return_time <= cur_cycle );
+    random_latency = Cycles(150);
     return random_latency;
 }
 void printHisto(const std::map<Cycles, std::pair<uint32_t,uint32_t>>

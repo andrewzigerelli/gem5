@@ -6,7 +6,7 @@
 # ARE SET AS ENVIRONMENT VARIABLES!!!
 ###################################################
 
-GEM5_PATH=~/gemb/gem5/
+GEM5_PATH=~/gemz/gem5/
 BUILD=X86_MESI_Two_Level
 GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.fast
 GDB_GEM_CMD=$GEM5_PATH/build/$BUILD/gem5.debug
